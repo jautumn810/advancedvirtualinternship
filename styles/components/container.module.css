@@ -1,0 +1,15 @@
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+.fullBleed {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+

@@ -1,0 +1,112 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-lg);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    background-color var(--transition-base),
+    color var(--transition-base),
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  color: var(--color-primary-contrast);
+  box-shadow: var(--shadow-md);
+}
+
+.btnPrimary:hover:not(:disabled),
+.btnPrimary:focus-visible:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btnSecondary {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.btnSecondary:hover:not(:disabled),
+.btnSecondary:focus-visible:not(:disabled) {
+  border-color: rgba(15, 159, 89, 0.28);
+  background-color: rgba(15, 159, 89, 0.06);
+}
+
+.btnGhost {
+  background-color: transparent;
+  color: var(--color-text-muted);
+  border: none;
+  box-shadow: none;
+}
+
+.btnGhost:hover:not(:disabled),
+.btnGhost:focus-visible:not(:disabled) {
+  color: var(--color-text);
+  background-color: rgba(3, 43, 65, 0.08);
+}
+
+.btnLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+.btnLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.15rem;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), rgba(93, 95, 239, 0.25));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-base);
+}
+
+.btnLink:hover::after,
+.btnLink:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.btnLink:hover,
+.btnLink:focus-visible {
+  color: var(--color-primary-hover);
+}
+
+.sm {
+  min-height: 36px;
+  padding: 0 1rem;
+  font-size: var(--text-sm);
+}
+
+.md {
+  min-height: 44px;
+  padding: 0 1.25rem;
+  font-size: var(--text-base);
+}
+
+.lg {
+  min-height: 52px;
+  padding: 0 1.75rem;
+  font-size: var(--text-lg);
+}
+

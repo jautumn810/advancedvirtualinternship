@@ -1,0 +1,102 @@
+.root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  padding: var(--space-10) var(--space-6);
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 65%, #f0f7ff 100%);
+  border-right: 1px solid rgba(3, 43, 65, 0.08);
+  box-shadow: 18px 0 48px -32px rgba(12, 35, 71, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  z-index: 30;
+}
+
+.brand {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0.65rem 0.9rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: rgba(3, 43, 65, 0.6);
+  border-radius: var(--radius-lg);
+  transition:
+    background-color var(--transition-base),
+    color var(--transition-base),
+    transform var(--transition-base);
+}
+
+.link:hover {
+  color: var(--color-text);
+  background: rgba(15, 159, 89, 0.08);
+}
+
+.linkActive {
+  color: var(--color-primary);
+  background: linear-gradient(120deg, rgba(15, 159, 89, 0.16), rgba(43, 217, 124, 0.1));
+  box-shadow: var(--shadow-sm);
+}
+
+.linkDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.linkDisabled:hover {
+  background: none;
+  color: rgba(3, 43, 65, 0.4);
+}
+
+.icon {
+  font-size: 1.1rem;
+}
+
+.footer {
+  margin-top: auto;
+}
+
+.authButton {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0.65rem 0.9rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(3, 43, 65, 0.12);
+  color: var(--color-text);
+  background: rgba(15, 159, 89, 0.08);
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base);
+}
+
+.authButton:hover {
+  background: rgba(15, 159, 89, 0.14);
+  border-color: rgba(15, 159, 89, 0.28);
+}
+
+@media (max-width: 900px) {
+  .root {
+    display: none;
+  }
+}
+

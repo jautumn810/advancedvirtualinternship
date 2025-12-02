@@ -1,0 +1,395 @@
+.main {
+  background-color: #ffffff;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+.section {
+  padding: 80px 0;
+}
+
+.row {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.heroSection {
+  padding-top: 96px;
+  padding-bottom: 72px;
+}
+
+.heroWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+.heroContent {
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.heroLogo {
+  width: 170px;
+  height: auto;
+}
+
+.heroTitle {
+  font-size: clamp(2.25rem, 3vw, 2.9rem);
+  line-height: 1.15;
+  font-weight: 700;
+  color: #074465;
+  margin: 0;
+}
+
+.heroSubtitle {
+  font-size: 1.025rem;
+  line-height: 1.6;
+  color: #536676;
+  margin: 0;
+}
+
+.heroActions {
+  margin-top: 12px;
+}
+
+.heroButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 32px;
+  border-radius: 12px;
+  background-color: #23d164;
+  color: #022132;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.heroButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(14, 128, 59, 0.18);
+}
+
+.heroVisual {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.heroImage {
+  width: min(360px, 100%);
+  height: auto;
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: clamp(2rem, 2.6vw, 2.5rem);
+  color: #0b4160;
+  margin-bottom: 48px;
+  font-weight: 700;
+}
+
+.featuresGrid {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.featureCard {
+  text-align: center;
+  background-color: #f5fbff;
+  border-radius: 18px;
+  padding: 32px 24px;
+  box-shadow: 0 18px 36px rgba(0, 50, 120, 0.08);
+}
+
+.featureIcon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0b4471 0%, #256fc4 100%);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 1.55rem;
+}
+
+.featureTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0b4160;
+  margin-bottom: 12px;
+}
+
+.featureDescription {
+  color: #516373;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.statisticsWrapper {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-items: start;
+}
+
+.statisticsHeadings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.statisticsHeadingsSecondary {
+  margin-top: 12px;
+}
+
+.statisticsHeading {
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: #596c7b;
+  margin: 0;
+  transition: color 0.5s ease;
+}
+
+.statisticsHeadingHighlight {
+  color: #13c061;
+}
+
+.statisticsDetails {
+  background-color: #eef7f3;
+  border-radius: 18px;
+  padding: 28px 32px;
+  display: grid;
+  gap: 22px;
+}
+
+.statisticsItemValue {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0e4a70;
+  margin-bottom: 4px;
+}
+
+.statisticsItemText {
+  margin: 0;
+  color: #516373;
+  line-height: 1.55;
+}
+
+.reviewsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto 32px;
+}
+
+.reviewCard {
+  background-color: #ffecc8;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 16px 30px rgba(170, 110, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.reviewName {
+  font-weight: 600;
+  color: #0b4160;
+  font-size: 1rem;
+}
+
+.reviewStars {
+  display: inline-flex;
+  gap: 4px;
+  color: #0b58d8;
+  font-size: 1.1rem;
+}
+
+.reviewStars svg {
+  fill: #0b58d8;
+  stroke: #0b58d8;
+}
+
+.reviewBody {
+  margin: 0;
+  color: #4e5f6d;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.reviewsAction {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.reviewsLoginButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 48px;
+  border-radius: 12px;
+  background-color: #23d164;
+  color: #022132;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.reviewsLoginButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(14, 128, 59, 0.18);
+}
+
+.numbersWrapper {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.numberCard {
+  background-color: #e0efff;
+  border-radius: 22px;
+  padding: 36px 26px;
+  text-align: center;
+  box-shadow: 0 20px 36px rgba(15, 70, 160, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+.numberIcon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: #3a7ef8;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+}
+
+.numberTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0b4160;
+  margin: 0;
+}
+
+.numberSubtitle {
+  margin: 0;
+  color: #546774;
+  line-height: 1.5;
+}
+
+.footer {
+  background-color: #edf5f1;
+  margin-top: 64px;
+  padding: 60px 0;
+}
+
+.footerTop {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-bottom: 36px;
+}
+
+.footerColumnTitle {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #0e4a70;
+  margin-bottom: 16px;
+}
+
+.footerLinks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footerLink {
+  color: #415360;
+  font-size: 0.95rem;
+}
+
+.footerBottom {
+  text-align: center;
+}
+
+.footerCopyright {
+  margin: 0;
+  color: #415360;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 960px) {
+  .heroWrapper {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .heroContent {
+    align-items: center;
+  }
+
+  .heroActions {
+    width: 100%;
+  }
+
+  .heroButton {
+    width: 100%;
+  }
+
+  .heroVisual {
+    order: -1;
+  }
+
+  .statisticsWrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .statisticsHeadingsSecondary {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: 64px 0;
+  }
+
+  .reviewCard,
+  .featureCard,
+  .numberCard {
+    border-radius: 18px;
+  }
+}
+

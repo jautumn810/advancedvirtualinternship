@@ -1,0 +1,159 @@
+.page {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(10, 14, 26, 0.95) 0%, rgba(12, 17, 29, 1) 50%, rgba(12, 17, 29, 0.96) 100%);
+}
+
+.content {
+  flex: 1;
+  margin-left: 280px;
+  padding: var(--space-12) var(--space-12) var(--space-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title {
+  color: var(--color-text);
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 720px;
+}
+
+.card {
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: rgba(12, 17, 29, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.cardIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: rgba(93, 95, 239, 0.18);
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.cardTitle {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.cardBody {
+  font-size: var(--text-sm);
+  color: rgba(203, 213, 247, 0.78);
+  line-height: var(--leading-normal);
+}
+
+.errorMessage {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: #fca5a5;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(20, 241, 149, 0.16);
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ctaNote {
+  font-size: var(--text-sm);
+  color: rgba(203, 213, 247, 0.65);
+}
+
+.loginCard {
+  margin-top: var(--space-12);
+  max-width: 520px;
+  padding: var(--space-10);
+  border-radius: var(--radius-xl);
+  background: rgba(12, 17, 29, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.loginIcon {
+  font-size: 3.5rem;
+  color: rgba(203, 213, 247, 0.55);
+}
+
+.loginTitle {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.loginBody {
+  font-size: var(--text-base);
+  color: rgba(203, 213, 247, 0.72);
+  line-height: var(--leading-snug);
+}
+
+@media (max-width: 1024px) {
+  .content {
+    margin-left: 0;
+    padding: var(--space-10) var(--space-6) var(--space-16);
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: var(--space-8) var(--space-4) var(--space-12);
+    gap: var(--space-10);
+  }
+
+  .card {
+    padding: var(--space-5);
+  }
+
+  .loginCard {
+    padding: var(--space-8);
+  }
+}
+
