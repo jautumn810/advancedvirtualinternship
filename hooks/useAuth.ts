@@ -16,8 +16,14 @@ export function useAuthListener(): void {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const authInstance = getAuthInstance();
+    if (!authInstance) {
+      console.warn('Firebase Auth is not initialized. Authentication features will be unavailable.');
+      return;
+    }
+    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const unsubscribe = onAuthStateChanged(getAuthInstance(), async (firebaseUser: any) => {
+    const unsubscribe = onAuthStateChanged(authInstance, async (firebaseUser: any) => {
       if (firebaseUser) {
         dispatch(
           setUser({
