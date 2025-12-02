@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { getAuthInstance } from "@/lib/firebase";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/store/slices/authSlice";
@@ -16,7 +16,7 @@ export function useAuthListener(): void {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getAuthInstance(), async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(getAuthInstance(), async (firebaseUser: User | null) => {
       if (firebaseUser) {
         dispatch(
           setUser({
