@@ -25,6 +25,49 @@ import buttonStyles from "@/styles/components/button.module.css";
 
 const SKELETON_COUNT = 5;
 
+// Helper function to check if a book matches the search query
+const matchesSearch = (book: Book, searchQuery: string): boolean => {
+  const query = searchQuery.toLowerCase().trim();
+  if (!query) return true;
+
+  const title = book.title.toLowerCase();
+  const author = book.author.toLowerCase();
+  const subTitle = book.subTitle?.toLowerCase() || '';
+
+  // Check for exact or partial matches in title
+  if (title.includes(query) || subTitle.includes(query)) {
+    return true;
+  }
+
+  // Check for exact or partial matches in author
+  if (author.includes(query)) {
+    return true;
+  }
+
+  // Check for abbreviation matches - check if query matches the beginning of any word
+  const titleWords = title.split(/\s+/);
+  const authorWords = author.split(/\s+/);
+  const allWords = [...titleWords, ...authorWords];
+
+  // Check if query matches the beginning of any word (for abbreviations)
+  for (const word of allWords) {
+    if (word.startsWith(query)) {
+      return true;
+    }
+  }
+
+  // Check if query matches initials (e.g., "JK" matches "J.K. Rowling" or "J K Rowling")
+  const initials = allWords
+    .map(word => word.charAt(0))
+    .join('')
+    .toLowerCase();
+  if (initials.includes(query)) {
+    return true;
+  }
+
+  return false;
+};
+
 export default function LibraryPage() {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -229,7 +272,7 @@ export default function LibraryPage() {
               <div className={styles.emptyCard}>
                 <p>Your saved books will appear here.</p>
                 <p>
-                  Tap "Add title to My Library" on any book page to build your collection.
+                  Tap &quot;Add title to My Library&quot; on any book page to build your collection.
                 </p>
               </div>
             )}
