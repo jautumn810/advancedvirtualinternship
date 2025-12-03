@@ -30,7 +30,7 @@
 }
 
 .section:first-of-type {
-  max-width: 550px;
+  max-width: 550px !important;
   width: 100%;
 }
 
@@ -72,10 +72,10 @@
 
 .selectedCard {
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+  display: grid !important;
+  grid-template-columns: 1fr auto auto !important;
   align-items: center;
-  gap: 4px;
+  gap: 4px !important;
   padding: 20px 24px;
   border-radius: 12px;
   background: #fef3d9;
@@ -98,15 +98,15 @@
   font-size: 14px;
   line-height: 1.4;
   color: #5f4a2e;
-  margin: 0;
-  max-width: 280px;
+  margin: 0 !important;
+  max-width: 280px !important;
 }
 
 .selectedRight {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: 4px !important;
 }
 
 .selectedCover {
@@ -419,19 +419,19 @@
   }
 
   .section:first-of-type {
-    max-width: 550px;
+    max-width: 550px !important;
   }
 
   .selectedCard {
-    grid-template-columns: 1fr;
-    gap: 4px;
+    grid-template-columns: 1fr auto auto !important;
+    gap: 4px !important;
     padding: 16px;
   }
 
   .selectedRight {
-    flex-direction: column;
+    flex-direction: row !important;
     align-items: center;
-    gap: 4px;
+    gap: 4px !important;
   }
 
   .selectedMeta {
@@ -477,12 +477,12 @@
   }
 
   .section:first-of-type {
-    max-width: 550px;
+    max-width: 550px !important;
   }
 
   .selectedCard {
     padding: 28px;
-    gap: 4px;
+    gap: 4px !important;
   }
 
   .selectedCover {
