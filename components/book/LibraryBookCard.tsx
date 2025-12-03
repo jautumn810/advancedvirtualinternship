@@ -31,6 +31,7 @@ export default function LibraryBookCard({
 
   return (
     <Link href={`/book/${book.id}`} className={styles.card}>
+      {book.subscriptionRequired && <div className={styles.badge}>Premium</div>}
       <div className={styles.imageWrap}>
         <Image
           src={imageSrc}
@@ -44,7 +45,6 @@ export default function LibraryBookCard({
             }
           }}
         />
-        {book.subscriptionRequired && <div className={styles.badge}>Premium</div>}
         {duration !== undefined && duration > 0 && (
           <div className={styles.duration}>{formatDuration(duration)}</div>
         )}

@@ -23,6 +23,7 @@ export default function BookCard({ book, duration }: BookCardProps) {
 
   return (
     <Link href={`/book/${book.id}`} className={styles.card}>
+      {book.subscriptionRequired && <div className={styles.badge}>Premium</div>}
       <div className={styles.imageWrap}>
         <Image
           src={imageSrc}
@@ -36,7 +37,6 @@ export default function BookCard({ book, duration }: BookCardProps) {
             }
           }}
         />
-        {book.subscriptionRequired && <div className={styles.badge}>Premium</div>}
         {duration !== undefined && duration > 0 && (
           <div className={styles.duration}>{formatDuration(duration)}</div>
         )}
