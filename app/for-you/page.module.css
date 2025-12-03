@@ -67,7 +67,7 @@
 .selectedCard {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 148px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 32px;
   padding: 36px;
@@ -75,6 +75,23 @@
   background: #fef3d9;
   border: 1px solid #fde4ba;
   box-shadow: 0 26px 48px rgba(255, 200, 133, 0.35);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.selectedCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 30px 56px rgba(255, 200, 133, 0.45);
+}
+
+.selectedRight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
 
 .selectedSummary {
@@ -123,20 +140,21 @@
   height: 48px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #0f9f59 0%, #2bd97c 100%);
+  background: #032b41;
   color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   cursor: pointer;
-  box-shadow: 0 14px 30px rgba(15, 159, 89, 0.35);
+  box-shadow: 0 4px 12px rgba(3, 43, 65, 0.3);
   transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .playButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 36px rgba(15, 159, 89, 0.4);
+  box-shadow: 0 6px 16px rgba(3, 43, 65, 0.4);
+  background: #053f5e;
 }
 
 .duration {
@@ -144,7 +162,33 @@
   color: rgba(44, 31, 16, 0.7);
 }
 
-.bookRow,
+.bookRow {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(3, 43, 65, 0.2) transparent;
+}
+
+.bookRow::-webkit-scrollbar {
+  height: 8px;
+}
+
+.bookRow::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bookRow::-webkit-scrollbar-thumb {
+  background: rgba(3, 43, 65, 0.2);
+  border-radius: 4px;
+}
+
+.bookRow::-webkit-scrollbar-thumb:hover {
+  background: rgba(3, 43, 65, 0.3);
+}
+
 .skeletonRow {
   display: grid;
   gap: 24px;
@@ -157,17 +201,35 @@
   flex-direction: column;
   gap: 14px;
   padding: 20px;
+  padding-bottom: 60px;
   border-radius: 24px;
   border: 1px solid #e5effc;
   background: #ffffff;
   box-shadow: 0 20px 40px rgba(12, 35, 71, 0.06);
-  overflow: hidden;
-  min-height: 100%;
+  overflow: visible;
+  min-width: 220px;
+  max-width: 220px;
+  flex-shrink: 0;
   text-decoration: none;
   color: inherit;
   transition:
     transform var(--transition-base),
     box-shadow var(--transition-base);
+  z-index: 1;
+}
+
+.semiCircle {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200%;
+  height: 100px;
+  border-radius: 50% 50% 0 0;
+  background: var(--semi-circle-color, #fef3d9);
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .bookTile:hover {
@@ -190,6 +252,48 @@
   letter-spacing: 0.1em;
 }
 
+.bookmarkButton {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform var(--transition-base), background var(--transition-base), box-shadow var(--transition-base);
+  z-index: 10;
+  padding: 0;
+}
+
+.bookmarkButton:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.bookmarkButton:active {
+  transform: scale(0.95);
+}
+
+.bookmarkOutline {
+  color: #4a5d6d;
+  stroke-width: 2;
+  fill: none;
+}
+
+.bookmarkFilled {
+  color: #0f9f59;
+  fill: #0f9f59;
+  stroke-width: 2;
+}
+
 .cover {
   position: relative;
   width: 100%;
@@ -197,6 +301,38 @@
   border-radius: 20px;
   overflow: hidden;
   background: #eef4ff;
+  z-index: 2;
+}
+
+.coverPlayButton {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(3, 43, 65, 0.9);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-base), background var(--transition-base), box-shadow var(--transition-base);
+  z-index: 10;
+  padding-left: 2px;
+}
+
+.coverPlayButton:hover {
+  transform: scale(1.1);
+  background: rgba(3, 43, 65, 1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.coverPlayButton:active {
+  transform: scale(0.95);
 }
 
 .tileTitle {

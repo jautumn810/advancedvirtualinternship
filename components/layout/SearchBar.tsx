@@ -30,11 +30,19 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
   );
   
   // Memoize local books to avoid unnecessary re-renders
-  const reduxLocalBooks = useMemo(() => [
-    ...(selectedBook ? [selectedBook] : []),
-    ...recommendedBooks,
-    ...suggestedBooks,
-  ], [selectedBook, recommendedBooks, suggestedBooks]);
+  // Include searchResults to search through previously found books too
+  const reduxLocalBooks = useMemo(() => {
+    const books = [
+      ...(selectedBook ? [selectedBook] : []),
+      ...recommendedBooks,
+      ...suggestedBooks,
+    ];
+    // Remove duplicates
+    const uniqueBooks = Array.from(
+      new Map(books.map(book => [book.id, book])).values()
+    );
+    return uniqueBooks;
+  }, [selectedBook, recommendedBooks, suggestedBooks]);
 
   // Use prop books if provided, otherwise use Redux books
   const localBooks = propLocalBooks || reduxLocalBooks;
@@ -54,22 +62,49 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
 
     if (!debouncedSearchQuery.trim()) {
       dispatch(setSearchResults([]));
+      dispatch(setError(null));
       return;
     }
 
-    dispatch(setLoading(true));
-    searchBooks(debouncedSearchQuery, localBooks)
-      .then((books) => {
+    const performSearch = async () => {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      
+      try {
+        const books = await searchBooks(debouncedSearchQuery, localBooks);
         dispatch(setSearchResults(books));
-        dispatch(setError(null));
-      })
-      .catch((error) => {
-        dispatch(setError(error.message));
-        dispatch(setSearchResults([]));
-      })
-      .finally(() => {
+        if (books.length === 0) {
+          // Don't show error if no results, just empty array
+          dispatch(setError(null));
+        }
+      } catch (error: any) {
+        console.error("Search error:", error);
+        // Only show error if we have no local books to search
+        if (!localBooks || localBooks.length === 0) {
+          dispatch(setError(error.message || "Search failed. Please try again."));
+        } else {
+          // If we have local books, search them even if API fails
+          try {
+            const localMatches = localBooks.filter((book: Book) => {
+              const query = debouncedSearchQuery.toLowerCase().trim();
+              const title = book.title.toLowerCase();
+              const author = book.author.toLowerCase();
+              const subTitle = book.subTitle?.toLowerCase() || '';
+              return title.includes(query) || author.includes(query) || subTitle.includes(query);
+            });
+            dispatch(setSearchResults(localMatches));
+            dispatch(setError(null));
+          } catch (localError) {
+            dispatch(setError("Search failed. Please try again."));
+            dispatch(setSearchResults([]));
+          }
+        }
+      } finally {
         dispatch(setLoading(false));
-      });
+      }
+    };
+
+    performSearch();
   }, [debouncedSearchQuery, dispatch, shouldHide, localBooks, localFilterMode]);
 
   if (shouldHide) {

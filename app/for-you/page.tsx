@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, createContext, useContext, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import {
@@ -20,8 +20,156 @@ import ErrorMessage from "@/components/ui/ErrorMessage";
 import { Book } from "@/types";
 import { useAudioDurations } from "@/hooks/useAudioDuration";
 import { formatDuration } from "@/lib/audio";
-import { FiClock, FiPlay, FiStar } from "react-icons/fi";
+import { addToLibrary, removeFromLibrary, getLibraryBooks, LibraryBook } from "@/lib/library";
+import { setAuthModalOpen } from "@/store/slices/authSlice";
+import { FiPlay, FiPause, FiClock, FiStar, FiBookmark } from "react-icons/fi";
 import styles from "./page.module.css";
+
+// Audio Sample Context
+interface AudioSampleContextType {
+  playingId: string | null;
+  playSample: (bookId: string, book: Book) => void;
+  stopSample: () => void;
+}
+
+const AudioSampleContext = createContext<AudioSampleContextType | null>(null);
+
+function AudioSampleProvider({ children }: { children: React.ReactNode }) {
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
+
+  // Load voices when component mounts
+  useEffect(() => {
+    const loadVoices = () => {
+      if ('speechSynthesis' in window) {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          setVoicesLoaded(true);
+        }
+      }
+    };
+
+    // Some browsers load voices asynchronously
+    if ('speechSynthesis' in window) {
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
+  }, []);
+
+  const stopSample = useCallback(() => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    if (speechSynthesisRef.current) {
+      speechSynthesisRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setPlayingId(null);
+  }, []);
+
+  const playSample = useCallback((bookId: string, book: Book) => {
+    // Stop any currently playing audio
+    stopSample();
+
+    // Check if browser supports speech synthesis
+    if (!('speechSynthesis' in window)) {
+      console.error("Speech synthesis not supported");
+      alert("Your browser doesn't support text-to-speech. Please use a modern browser like Chrome, Edge, or Safari.");
+      return;
+    }
+
+    // Get the book summary text
+    const summaryText = book.summary || book.bookDescription || book.subTitle || 
+      `Welcome to ${book.title} by ${book.author}. ${book.subTitle || 'This is a summary of the key ideas and insights from this book.'}`;
+
+    // Create a 30-second sample text (approximately 60-75 words)
+    const words = summaryText.split(' ');
+    const sampleWords = words.slice(0, 75).join(' ');
+    const sampleText = sampleWords.length < summaryText.length 
+      ? `${sampleWords}...` 
+      : sampleWords;
+
+    // Create speech synthesis utterance
+    const utterance = new SpeechSynthesisUtterance(sampleText);
+    utterance.rate = 0.9; // Slightly slower for clarity
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    // Use a pleasant voice if available
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      const preferredVoice = voices.find(voice => 
+        (voice.name.includes('Google') || voice.name.includes('Microsoft')) &&
+        voice.lang.startsWith('en')
+      ) || voices.find(voice => 
+        voice.lang.startsWith('en') && voice.localService === false
+      ) || voices.find(voice => voice.lang.startsWith('en'));
+      
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+    }
+
+    speechSynthesisRef.current = utterance;
+
+    // Handle when speech ends
+    utterance.onend = () => {
+      stopSample();
+    };
+
+    utterance.onerror = (error) => {
+      console.error("Speech synthesis error:", error);
+      stopSample();
+    };
+
+    // Play the speech
+    try {
+      window.speechSynthesis.speak(utterance);
+      setPlayingId(bookId);
+
+      // Stop after 30 seconds (sample duration)
+      timeoutRef.current = setTimeout(() => {
+        stopSample();
+      }, 30000);
+    } catch (error) {
+      console.error("Error starting speech:", error);
+      alert("Unable to play audio. Please check your browser settings.");
+      stopSample();
+    }
+  }, [stopSample]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopSample();
+    };
+  }, [stopSample]);
+
+  return (
+    <AudioSampleContext.Provider value={{ playingId, playSample, stopSample }}>
+      {children}
+    </AudioSampleContext.Provider>
+  );
+}
+
+function useAudioSample() {
+  const context = useContext(AudioSampleContext);
+  if (!context) {
+    throw new Error("useAudioSample must be used within AudioSampleProvider");
+  }
+  return context;
+}
 
 const FALLBACK_IMAGE = "https://via.placeholder.com/320x480?text=No+Image";
 
@@ -32,13 +180,57 @@ const getDescription = (book: Book): string => {
   return firstSentence.endsWith(".") ? firstSentence : `${firstSentence}.`;
 };
 
-function BookTile({ book, duration }: { book: Book; duration?: number }) {
+function BookTile({ book, duration, isBookmarked, onBookmarkToggle }: { book: Book; duration?: number; isBookmarked: boolean; onBookmarkToggle: () => void }) {
   const [imageSrc, setImageSrc] = useState(book.imageLink || FALLBACK_IMAGE);
-  const description = useMemo(() => getDescription(book), [book]);
+  const { playingId, playSample, stopSample } = useAudioSample();
+  const isPlaying = playingId === book.id;
+
+  // Generate a color index based on book ID for consistent semi-circle colors
+  const colorIndex = useMemo(() => {
+    const colors = ['#dc3545', '#8b6f47', '#d4af37', '#fef3d9', '#ffd700'];
+    const hash = book.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+  }, [book.id]);
+
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isPlaying) {
+      stopSample();
+    } else {
+      playSample(book.id, book);
+    }
+  };
+
+  const handleBookmarkClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onBookmarkToggle();
+  };
+
+  if (!book.id) {
+    return null; // Don't render if book ID is missing
+  }
 
   return (
-    <Link href={`/book/${book.id}`} className={styles.bookTile}>
+    <Link 
+      href={`/book/${encodeURIComponent(book.id)}`} 
+      className={styles.bookTile}
+      style={{ '--semi-circle-color': colorIndex } as React.CSSProperties}
+    >
+      <div className={styles.semiCircle}></div>
       {book.subscriptionRequired && <span className={styles.badge}>Premium</span>}
+      <button
+        type="button"
+        className={styles.bookmarkButton}
+        onClick={handleBookmarkClick}
+        aria-label={isBookmarked ? "Remove from library" : "Add to library"}
+      >
+        <FiBookmark 
+          aria-hidden="true" 
+          className={isBookmarked ? styles.bookmarkFilled : styles.bookmarkOutline}
+        />
+      </button>
       <div className={styles.cover}>
         <Image
           src={imageSrc}
@@ -51,10 +243,97 @@ function BookTile({ book, duration }: { book: Book; duration?: number }) {
             }
           }}
         />
+        <button
+          type="button"
+          className={styles.coverPlayButton}
+          onClick={handlePlayClick}
+          aria-label={isPlaying ? "Pause sample" : "Play sample"}
+        >
+          {isPlaying ? <FiPause aria-hidden="true" /> : <FiPlay aria-hidden="true" />}
+        </button>
       </div>
       <h3 className={styles.tileTitle}>{book.title}</h3>
       <p className={styles.tileAuthor}>{book.author}</p>
-      {description && <p className={styles.tileDescription}>{description}</p>}
+      {book.subTitle && <p className={styles.tileDescription}>{book.subTitle}</p>}
+    </Link>
+  );
+}
+
+function SuggestedBookTile({ book, duration, isBookmarked, onBookmarkToggle }: { book: Book; duration?: number; isBookmarked: boolean; onBookmarkToggle: () => void }) {
+  const [imageSrc, setImageSrc] = useState(book.imageLink || FALLBACK_IMAGE);
+  const { playingId, playSample, stopSample } = useAudioSample();
+  const isPlaying = playingId === book.id;
+
+  // Generate a color index based on book ID for consistent semi-circle colors
+  const colorIndex = useMemo(() => {
+    const colors = ['#dc3545', '#8b6f47', '#d4af37', '#fef3d9', '#ffd700'];
+    const hash = book.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[hash % colors.length];
+  }, [book.id]);
+
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isPlaying) {
+      stopSample();
+    } else {
+      playSample(book.id, book);
+    }
+  };
+
+  const handleBookmarkClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onBookmarkToggle();
+  };
+
+  if (!book.id) {
+    return null; // Don't render if book ID is missing
+  }
+
+  return (
+    <Link 
+      href={`/book/${encodeURIComponent(book.id)}`} 
+      className={styles.bookTile}
+      style={{ '--semi-circle-color': colorIndex } as React.CSSProperties}
+    >
+      <div className={styles.semiCircle}></div>
+      {book.subscriptionRequired && <span className={styles.badge}>Premium</span>}
+      <button
+        type="button"
+        className={styles.bookmarkButton}
+        onClick={handleBookmarkClick}
+        aria-label={isBookmarked ? "Remove from library" : "Add to library"}
+      >
+        <FiBookmark 
+          aria-hidden="true" 
+          className={isBookmarked ? styles.bookmarkFilled : styles.bookmarkOutline}
+        />
+      </button>
+      <div className={styles.cover}>
+        <Image
+          src={imageSrc}
+          alt={book.title}
+          fill
+          sizes="(max-width: 768px) 45vw, 180px"
+          onError={() => {
+            if (imageSrc !== FALLBACK_IMAGE) {
+              setImageSrc(FALLBACK_IMAGE);
+            }
+          }}
+        />
+        <button
+          type="button"
+          className={styles.coverPlayButton}
+          onClick={handlePlayClick}
+          aria-label={isPlaying ? "Pause sample" : "Play sample"}
+        >
+          {isPlaying ? <FiPause aria-hidden="true" /> : <FiPlay aria-hidden="true" />}
+        </button>
+      </div>
+      <h3 className={styles.tileTitle}>{book.title}</h3>
+      <p className={styles.tileAuthor}>{book.author}</p>
+      {book.subTitle && <p className={styles.tileDescription}>{book.subTitle}</p>}
       <div className={styles.tileMeta}>
         {duration ? (
           <span className={styles.metaItem}>
@@ -78,6 +357,7 @@ export default function ForYouPage() {
   const { selectedBook, recommendedBooks, suggestedBooks, searchResults, isLoading, error } = useSelector(
     (state: RootState) => state.books
   );
+  const { user } = useSelector((state: RootState) => state.auth);
 
   const allBooks = [
     ...(selectedBook ? [selectedBook] : []),
@@ -87,6 +367,8 @@ export default function ForYouPage() {
   ];
   const durations = useAudioDurations(allBooks);
   const [selectedCover, setSelectedCover] = useState(FALLBACK_IMAGE);
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [bookmarking, setBookmarking] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -139,6 +421,78 @@ export default function ForYouPage() {
     }
   }, [selectedBook]);
 
+  // Fetch bookmarked books
+  useEffect(() => {
+    if (!user) {
+      setBookmarkedIds(new Set());
+      return;
+    }
+
+    const fetchBookmarks = async () => {
+      try {
+        // Import Firestore functions to query directly and preserve book id
+        const { db } = await import("@/lib/firebase");
+        const { collection, query, where, getDocs } = await import("firebase/firestore");
+        
+        const q = query(
+          collection(db, "library"),
+          where("userId", "==", user.uid)
+        );
+        const querySnapshot = await getDocs(q);
+        
+        // Get the book's original id from document data before it gets overwritten
+        const bookmarkedSet = new Set<string>();
+        querySnapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          // The book's original id is stored in the "id" field of the document
+          // before getLibraryBooks overwrites it with the Firestore doc id
+          if (data.id) {
+            bookmarkedSet.add(data.id);
+          }
+        });
+        
+        setBookmarkedIds(bookmarkedSet);
+      } catch (error) {
+        console.error("Error fetching bookmarks:", error);
+      }
+    };
+
+    fetchBookmarks();
+  }, [user]);
+
+  const handleBookmarkToggle = async (book: Book) => {
+    if (!user) {
+      dispatch(setAuthModalOpen(true));
+      return;
+    }
+
+    const isBookmarked = bookmarkedIds.has(book.id);
+    setBookmarking((prev) => new Set(prev).add(book.id));
+
+    try {
+      if (isBookmarked) {
+        await removeFromLibrary(user.uid, book.id);
+        setBookmarkedIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(book.id);
+          return newSet;
+        });
+      } else {
+        await addToLibrary(user.uid, book);
+        setBookmarkedIds((prev) => new Set(prev).add(book.id));
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      alert("Failed to update bookmark. Please try again.");
+    } finally {
+      setBookmarking((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(book.id);
+        return newSet;
+      });
+    }
+  };
+
   const selectedDuration = selectedBook ? durations[selectedBook.id] : undefined;
   const selectedDescription = selectedBook ? getDescription(selectedBook) : "";
   const recommendedDisplay = recommendedBooks.slice(0, 6);
@@ -146,9 +500,10 @@ export default function ForYouPage() {
   const showSearchResults = searchResults.length > 0;
 
   return (
-    <div className={styles.page}>
-      <Sidebar />
-      <main className={styles.content}>
+    <AudioSampleProvider>
+      <div className={styles.page}>
+        <Sidebar />
+        <main className={styles.content}>
         <div className={styles.toolbar}>
           <SearchBar />
         </div>
@@ -208,34 +563,49 @@ export default function ForYouPage() {
               ))}
             </div>
           ) : selectedBook ? (
-            <article className={styles.selectedCard}>
-              <p className={styles.selectedSummary}>{selectedDescription}</p>
-              <div className={styles.selectedCover}>
-                <Image
-                  src={selectedCover}
-                  alt={selectedBook.title}
-                  fill
-                  sizes="148px"
-                  onError={() => {
-                    if (selectedCover !== FALLBACK_IMAGE) {
-                      setSelectedCover(FALLBACK_IMAGE);
-                    }
-                  }}
-                />
-              </div>
-              <div className={styles.selectedMeta}>
-                <h3 className={styles.selectedTitle}>{selectedBook.title}</h3>
-                <p className={styles.selectedAuthor}>{selectedBook.author}</p>
-                <div className={styles.selectedControls}>
-                  <button type="button" className={styles.playButton} aria-label="Play summary">
-                    <FiPlay aria-hidden="true" />
-                  </button>
-                  {selectedDuration ? (
-                    <span className={styles.duration}>{formatDuration(selectedDuration)}</span>
-                  ) : null}
+            <Link href={`/book/${selectedBook.id}`} className={styles.selectedCard}>
+              <p className={styles.selectedSummary}>
+                {selectedBook.subTitle || selectedBook.bookDescription?.split(". ")[0] || selectedDescription}
+              </p>
+              <div className={styles.selectedRight}>
+                <div className={styles.selectedCover}>
+                  <Image
+                    src={selectedCover}
+                    alt={selectedBook.title}
+                    fill
+                    sizes="148px"
+                    onError={() => {
+                      if (selectedCover !== FALLBACK_IMAGE) {
+                        setSelectedCover(FALLBACK_IMAGE);
+                      }
+                    }}
+                  />
+                </div>
+                <div className={styles.selectedMeta}>
+                  <h3 className={styles.selectedTitle}>{selectedBook.title}</h3>
+                  <p className={styles.selectedAuthor}>{selectedBook.author}</p>
+                  <div className={styles.selectedControls}>
+                    <button 
+                      type="button" 
+                      className={styles.playButton}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (selectedBook) {
+                          window.location.href = `/player/${selectedBook.id}`;
+                        }
+                      }}
+                      aria-label="Play summary"
+                    >
+                      <FiPlay aria-hidden="true" />
+                    </button>
+                    {selectedDuration && (
+                      <span className={styles.duration}>{formatDuration(selectedDuration)}</span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </article>
+            </Link>
           ) : (
             <p className={styles.emptyState}>No selection available right now.</p>
           )}
@@ -255,7 +625,13 @@ export default function ForYouPage() {
           ) : recommendedDisplay.length > 0 ? (
             <div className={styles.bookRow}>
               {recommendedDisplay.map((book) => (
-                <BookTile key={book.id} book={book} duration={durations[book.id]} />
+                <BookTile 
+                  key={book.id} 
+                  book={book} 
+                  duration={durations[book.id]}
+                  isBookmarked={bookmarkedIds.has(book.id)}
+                  onBookmarkToggle={() => handleBookmarkToggle(book)}
+                />
               ))}
             </div>
           ) : (
@@ -277,7 +653,13 @@ export default function ForYouPage() {
           ) : suggestedDisplay.length > 0 ? (
             <div className={styles.bookRow}>
               {suggestedDisplay.map((book) => (
-                <BookTile key={book.id} book={book} duration={durations[book.id]} />
+                <SuggestedBookTile 
+                  key={book.id} 
+                  book={book} 
+                  duration={durations[book.id]}
+                  isBookmarked={bookmarkedIds.has(book.id)}
+                  onBookmarkToggle={() => handleBookmarkToggle(book)}
+                />
               ))}
             </div>
           ) : (
@@ -292,12 +674,19 @@ export default function ForYouPage() {
             </div>
             <div className={styles.bookRow}>
               {searchResults.map((book) => (
-                <BookTile key={book.id} book={book} duration={durations[book.id]} />
+                <BookTile 
+                  key={book.id} 
+                  book={book} 
+                  duration={durations[book.id]}
+                  isBookmarked={bookmarkedIds.has(book.id)}
+                  onBookmarkToggle={() => handleBookmarkToggle(book)}
+                />
               ))}
             </div>
           </section>
         )}
       </main>
     </div>
+    </AudioSampleProvider>
   );
 }
