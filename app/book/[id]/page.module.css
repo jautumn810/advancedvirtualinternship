@@ -161,6 +161,41 @@
   gap: 18px;
 }
 
+.summaryContent {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.summaryContent p {
+  margin: 0;
+  line-height: 1.8;
+}
+
+.authorInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.authorName {
+  font-size: 20px;
+  font-weight: 700;
+  color: #032b41;
+  margin: 0;
+}
+
+.authorDescription {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.authorDescription p {
+  margin: 0;
+  line-height: 1.8;
+}
+
 .tags {
   display: flex;
   gap: 12px;

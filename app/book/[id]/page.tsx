@@ -280,16 +280,47 @@ export default function BookDetailPage() {
         )}
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>What&apos;s it about?</h2>
+          <h2 className={styles.sectionTitle}>Summary</h2>
           <div className={styles.sectionBody}>
-            <p>{book.bookDescription || excerpt}</p>
+            {book.summary ? (
+              <div className={styles.summaryContent}>
+                {book.summary.split('\n').map((paragraph, index) => (
+                  paragraph.trim() && (
+                    <p key={index}>{paragraph.trim()}</p>
+                  )
+                ))}
+              </div>
+            ) : book.bookDescription ? (
+              <div className={styles.summaryContent}>
+                {book.bookDescription.split('\n').map((paragraph, index) => (
+                  paragraph.trim() && (
+                    <p key={index}>{paragraph.trim()}</p>
+                  )
+                ))}
+              </div>
+            ) : (
+              <p>No summary available for this book.</p>
+            )}
           </div>
         </section>
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>About the author</h2>
+          <h2 className={styles.sectionTitle}>About the Author</h2>
           <div className={styles.sectionBody}>
-            <p>{book.authorDescription}</p>
+            <div className={styles.authorInfo}>
+              <h3 className={styles.authorName}>{book.author}</h3>
+              {book.authorDescription ? (
+                <div className={styles.authorDescription}>
+                  {book.authorDescription.split('\n').map((paragraph, index) => (
+                    paragraph.trim() && (
+                      <p key={index}>{paragraph.trim()}</p>
+                    )
+                  ))}
+                </div>
+              ) : (
+                <p>No author information available.</p>
+              )}
+            </div>
           </div>
         </section>
       </main>
