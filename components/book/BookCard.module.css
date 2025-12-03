@@ -5,7 +5,8 @@
   color: var(--color-text);
   text-decoration: none;
   position: relative;
-  padding-top: 20px;
+  padding-top: 32px;
+  overflow: visible;
 }
 
 .imageWrap {
@@ -35,24 +36,25 @@
 }
 
 .badge {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  padding: 0.5rem 1rem;
-  font-size: var(--text-xs);
-  font-weight: 700;
-  background: rgba(93, 95, 239, 0.95);
-  color: var(--color-primary-contrast);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  z-index: 20;
-  box-shadow: 0 4px 12px rgba(93, 95, 239, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  pointer-events: none;
-  white-space: nowrap;
+  position: absolute !important;
+  top: -16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  border-radius: 999px !important;
+  padding: 8px 16px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  background: rgba(93, 95, 239, 1) !important;
+  color: #ffffff !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  z-index: 100 !important;
+  box-shadow: 0 6px 16px rgba(93, 95, 239, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
 }
 
 .duration {
