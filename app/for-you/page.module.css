@@ -163,6 +163,16 @@
   box-shadow: 0 20px 40px rgba(12, 35, 71, 0.06);
   overflow: hidden;
   min-height: 100%;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.bookTile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 48px rgba(12, 35, 71, 0.12);
 }
 
 .badge {

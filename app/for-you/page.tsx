@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -36,7 +37,7 @@ function BookTile({ book, duration }: { book: Book; duration?: number }) {
   const description = useMemo(() => getDescription(book), [book]);
 
   return (
-    <article className={styles.bookTile}>
+    <Link href={`/book/${book.id}`} className={styles.bookTile}>
       {book.subscriptionRequired && <span className={styles.badge}>Premium</span>}
       <div className={styles.cover}>
         <Image
@@ -68,7 +69,7 @@ function BookTile({ book, duration }: { book: Book; duration?: number }) {
           </span>
         ) : null}
       </div>
-    </article>
+    </Link>
   );
 }
 

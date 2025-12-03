@@ -15,6 +15,7 @@ import buttonStyles from "@/styles/components/button.module.css";
 const navLinks = [
   { label: "Discover", href: "/" },
   { label: "For You", href: "/for-you" },
+  { label: "Books", href: "/books" },
   { label: "Library", href: "/library" },
   { label: "Pricing", href: "/choose-plan" },
 ];
