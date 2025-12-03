@@ -67,14 +67,14 @@
 .selectedCard {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 32px;
-  padding: 36px;
-  border-radius: 28px;
+  gap: 24px;
+  padding: 24px 28px;
+  border-radius: 16px;
   background: #fef3d9;
   border: 1px solid #fde4ba;
-  box-shadow: 0 26px 48px rgba(255, 200, 133, 0.35);
+  box-shadow: 0 4px 12px rgba(255, 200, 133, 0.2);
   overflow: hidden;
   text-decoration: none;
   color: inherit;
@@ -83,47 +83,52 @@
 }
 
 .selectedCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 30px 56px rgba(255, 200, 133, 0.45);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 200, 133, 0.3);
+}
+
+.selectedSummary {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #5f4a2e;
+  margin: 0;
+  max-width: 100%;
 }
 
 .selectedRight {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 16px;
-}
-
-.selectedSummary {
-  font-size: 16px;
-  line-height: 1.6;
-  color: #5f4a2e;
+  gap: 20px;
 }
 
 .selectedCover {
   position: relative;
-  width: 148px;
+  width: 120px;
   aspect-ratio: 3 / 4.4;
-  border-radius: 20px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 20px 32px rgba(189, 122, 54, 0.25);
+  box-shadow: 0 8px 16px rgba(189, 122, 54, 0.2);
+  flex-shrink: 0;
 }
 
 .selectedMeta {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
 }
 
 .selectedTitle {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: #2c1f10;
   margin: 0;
+  line-height: 1.3;
 }
 
 .selectedAuthor {
-  font-size: 15px;
+  font-size: 14px;
   color: rgba(44, 31, 16, 0.7);
   margin: 0;
 }
@@ -131,13 +136,13 @@
 .selectedControls {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-top: 6px;
+  gap: 12px;
+  margin-top: 4px;
 }
 
 .playButton {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
   background: #032b41;
@@ -145,21 +150,23 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 16px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(3, 43, 65, 0.3);
+  box-shadow: 0 2px 8px rgba(3, 43, 65, 0.25);
   transition: transform var(--transition-base), box-shadow var(--transition-base);
+  flex-shrink: 0;
 }
 
 .playButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(3, 43, 65, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(3, 43, 65, 0.35);
   background: #053f5e;
 }
 
 .duration {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(44, 31, 16, 0.7);
+  white-space: nowrap;
 }
 
 .bookRow {
@@ -239,17 +246,19 @@
 
 .badge {
   position: absolute;
-  top: 16px;
-  left: 18px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(15, 159, 89, 0.12);
-  border: 1px solid rgba(15, 159, 89, 0.32);
-  color: #0f9f59;
-  font-size: 12px;
+  top: 12px;
+  right: 12px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: #032b41;
+  border: none;
+  color: #ffffff;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
+  z-index: 10;
+  line-height: 1;
 }
 
 .bookmarkButton {
@@ -401,12 +410,19 @@
 
   .selectedCard {
     grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .selectedRight {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
   }
 
   .selectedMeta {
     align-items: center;
+    text-align: center;
   }
 
   .selectedSummary {

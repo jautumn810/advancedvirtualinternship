@@ -567,42 +567,40 @@ export default function ForYouPage() {
               <p className={styles.selectedSummary}>
                 {selectedBook.subTitle || selectedBook.bookDescription?.split(". ")[0] || selectedDescription}
               </p>
-              <div className={styles.selectedRight}>
-                <div className={styles.selectedCover}>
-                  <Image
-                    src={selectedCover}
-                    alt={selectedBook.title}
-                    fill
-                    sizes="148px"
-                    onError={() => {
-                      if (selectedCover !== FALLBACK_IMAGE) {
-                        setSelectedCover(FALLBACK_IMAGE);
+              <div className={styles.selectedCover}>
+                <Image
+                  src={selectedCover}
+                  alt={selectedBook.title}
+                  fill
+                  sizes="120px"
+                  onError={() => {
+                    if (selectedCover !== FALLBACK_IMAGE) {
+                      setSelectedCover(FALLBACK_IMAGE);
+                    }
+                  }}
+                />
+              </div>
+              <div className={styles.selectedMeta}>
+                <h3 className={styles.selectedTitle}>{selectedBook.title}</h3>
+                <p className={styles.selectedAuthor}>{selectedBook.author}</p>
+                <div className={styles.selectedControls}>
+                  <button 
+                    type="button" 
+                    className={styles.playButton}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (selectedBook) {
+                        window.location.href = `/player/${selectedBook.id}`;
                       }
                     }}
-                  />
-                </div>
-                <div className={styles.selectedMeta}>
-                  <h3 className={styles.selectedTitle}>{selectedBook.title}</h3>
-                  <p className={styles.selectedAuthor}>{selectedBook.author}</p>
-                  <div className={styles.selectedControls}>
-                    <button 
-                      type="button" 
-                      className={styles.playButton}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (selectedBook) {
-                          window.location.href = `/player/${selectedBook.id}`;
-                        }
-                      }}
-                      aria-label="Play summary"
-                    >
-                      <FiPlay aria-hidden="true" />
-                    </button>
-                    {selectedDuration && (
-                      <span className={styles.duration}>{formatDuration(selectedDuration)}</span>
-                    )}
-                  </div>
+                    aria-label="Play summary"
+                  >
+                    <FiPlay aria-hidden="true" />
+                  </button>
+                  {selectedDuration && (
+                    <span className={styles.duration}>{formatDuration(selectedDuration)}</span>
+                  )}
                 </div>
               </div>
             </Link>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
 import { setSearchResults, setLoading, setError } from "@/store/slices/booksSlice";
 import { searchBooks } from "@/lib/api";
@@ -21,6 +22,7 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const dispatch = useDispatch();
+  const router = useRouter();
   const pathname = usePathname();
   const shouldHide = pathname === "/" || pathname === "/choose-plan";
   
@@ -76,6 +78,11 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
         if (books.length === 0) {
           // Don't show error if no results, just empty array
           dispatch(setError(null));
+        } else {
+          // Navigate to for-you page to show search results if not already there
+          if (pathname !== "/for-you" && !localFilterMode) {
+            router.push("/for-you");
+          }
         }
       } catch (error: any) {
         console.error("Search error:", error);
@@ -94,6 +101,10 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
             });
             dispatch(setSearchResults(localMatches));
             dispatch(setError(null));
+            // Navigate to for-you page to show search results if not already there
+            if (localMatches.length > 0 && pathname !== "/for-you" && !localFilterMode) {
+              router.push("/for-you");
+            }
           } catch (localError) {
             dispatch(setError("Search failed. Please try again."));
             dispatch(setSearchResults([]));
@@ -105,7 +116,7 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
     };
 
     performSearch();
-  }, [debouncedSearchQuery, dispatch, shouldHide, localBooks, localFilterMode]);
+  }, [debouncedSearchQuery, dispatch, shouldHide, localBooks, localFilterMode, pathname, router]);
 
   if (shouldHide) {
     return null;
