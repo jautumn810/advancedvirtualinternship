@@ -369,6 +369,8 @@ export default function ForYouPage() {
   const [selectedCover, setSelectedCover] = useState(FALLBACK_IMAGE);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [bookmarking, setBookmarking] = useState<Set<string>>(new Set());
+  const [selectedAudioPlaying, setSelectedAudioPlaying] = useState(false);
+  const selectedAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -459,6 +461,56 @@ export default function ForYouPage() {
 
     fetchBookmarks();
   }, [user]);
+
+  // Handle selected book audio playback
+  const handleSelectedPlayClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!selectedBook) return;
+    
+    if (!selectedBook.audioLink) {
+      // If no audio link, redirect to player page
+      window.location.href = `/player/${selectedBook.id}`;
+      return;
+    }
+
+    const audio = selectedAudioRef.current;
+    if (!audio) return;
+
+    if (selectedAudioPlaying) {
+      audio.pause();
+      setSelectedAudioPlaying(false);
+    } else {
+      audio.play().catch((err) => {
+        console.error("Error playing audio:", err);
+        // Fallback to redirect if play fails
+        window.location.href = `/player/${selectedBook.id}`;
+      });
+      setSelectedAudioPlaying(true);
+    }
+  }, [selectedBook, selectedAudioPlaying]);
+
+  useEffect(() => {
+    if (!selectedBook?.audioLink) return;
+    
+    const audio = selectedAudioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => setSelectedAudioPlaying(false);
+    const handlePause = () => setSelectedAudioPlaying(false);
+    const handlePlay = () => setSelectedAudioPlaying(true);
+
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("play", handlePlay);
+
+    return () => {
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("play", handlePlay);
+    };
+  }, [selectedBook?.audioLink]);
 
   const handleBookmarkToggle = async (book: Book) => {
     if (!user) {
@@ -584,19 +636,21 @@ export default function ForYouPage() {
                 <h3 className={styles.selectedTitle}>{selectedBook.title}</h3>
                 <p className={styles.selectedAuthor}>{selectedBook.author}</p>
                 <div className={styles.selectedControls}>
+                  {selectedBook.audioLink && (
+                    <audio
+                      ref={selectedAudioRef}
+                      src={selectedBook.audioLink}
+                      preload="metadata"
+                      style={{ display: "none" }}
+                    />
+                  )}
                   <button 
                     type="button" 
                     className={styles.playButton}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (selectedBook) {
-                        window.location.href = `/player/${selectedBook.id}`;
-                      }
-                    }}
-                    aria-label="Play summary"
+                    onClick={handleSelectedPlayClick}
+                    aria-label={selectedAudioPlaying ? "Pause summary" : "Play summary"}
                   >
-                    <FiPlay aria-hidden="true" />
+                    {selectedAudioPlaying ? <FiPause aria-hidden="true" /> : <FiPlay aria-hidden="true" />}
                   </button>
                   {selectedDuration && (
                     <span className={styles.duration}>{formatDuration(selectedDuration)}</span>
