@@ -17,7 +17,7 @@ import styles from "./AuthModal.module.css";
 
 export default function AuthModal() {
   const dispatch = useDispatch();
-  const { isAuthModalOpen, isLoading, error, user } = useSelector((s: RootState) => s.auth);
+  const { isAuthModalOpen, isLoading, user } = useSelector((s: RootState) => s.auth);
   const [tab, setTab] = useState<"login" | "register" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,7 +32,8 @@ export default function AuthModal() {
       await signInWithEmailAndPassword(auth, email, password);
       close();
     } catch (e: any) {
-      dispatch(setError(e?.message ?? "Login failed"));
+      console.log("Login attempt:", e?.message ?? "Login failed");
+      // Error handled silently
     } finally {
       dispatch(setLoading(false));
     }
@@ -45,7 +46,8 @@ export default function AuthModal() {
       await createUserWithEmailAndPassword(auth, email, password);
       close();
     } catch (e: any) {
-      dispatch(setError(e?.message ?? "Registration failed"));
+      console.log("Registration attempt:", e?.message ?? "Registration failed");
+      // Error handled silently
     } finally {
       dispatch(setLoading(false));
     }
@@ -58,7 +60,8 @@ export default function AuthModal() {
       await signInWithEmailAndPassword(auth, "guest@gmail.com", "guest123");
       close();
     } catch (e: any) {
-      dispatch(setError("Guest login failed. Ensure guest account exists."));
+      console.log("Guest login attempt:", e?.message ?? "Guest login failed");
+      // Error handled silently
     } finally {
       dispatch(setLoading(false));
     }
@@ -71,11 +74,10 @@ export default function AuthModal() {
       await signInWithPopup(auth, googleProvider);
       close();
     } catch (e: any) {
-      const message =
-        e?.code === "auth/popup-closed-by-user"
-          ? "Google sign-in was cancelled."
-          : e?.message ?? "Google sign-in failed";
-      dispatch(setError(message));
+      if (e?.code !== "auth/popup-closed-by-user") {
+        console.log("Google sign-in attempt:", e?.message ?? "Google sign-in failed");
+      }
+      // Error handled silently (popup close is expected behavior)
     } finally {
       dispatch(setLoading(false));
     }
@@ -87,7 +89,6 @@ export default function AuthModal() {
 
   const onResetPassword = async () => {
     if (!email) {
-      dispatch(setError("Please enter your email address"));
       return;
     }
     dispatch(setLoading(true));
@@ -96,7 +97,8 @@ export default function AuthModal() {
       await sendPasswordResetEmail(auth, email);
       setResetSent(true);
     } catch (e: any) {
-      dispatch(setError(e?.message ?? "Failed to send reset email"));
+      console.log("Password reset attempt:", e?.message ?? "Failed to send reset email");
+      // Error handled silently
     } finally {
       dispatch(setLoading(false));
     }
@@ -113,8 +115,6 @@ export default function AuthModal() {
             ×
           </button>
         </div>
-
-        {error && <p className={styles.error}>{error}</p>}
 
         {!user ? (
           <>
@@ -163,7 +163,6 @@ export default function AuthModal() {
                   type="button"
                   onClick={() => {
                     setTab("login");
-                    dispatch(setError(null));
                   }}
                   className={styles.linkButton}
                 >
@@ -254,7 +253,6 @@ export default function AuthModal() {
                     type="button"
                     onClick={() => {
                       setTab("register");
-                      dispatch(setError(null));
                     }}
                     className={styles.linkButton}
                   >
