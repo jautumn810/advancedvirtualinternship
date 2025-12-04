@@ -22,6 +22,9 @@
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .brandIcon {
@@ -43,6 +46,9 @@
   font-weight: 600;
   color: rgba(3, 43, 65, 0.6);
   border-radius: var(--radius-lg);
+  text-decoration: none;
+  cursor: pointer;
+  pointer-events: auto;
   transition:
     background-color var(--transition-base),
     color var(--transition-base),
