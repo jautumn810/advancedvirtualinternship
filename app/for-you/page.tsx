@@ -86,35 +86,75 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
     // If book has an audioLink, use HTML5 Audio
     if (book.audioLink && book.audioLink.trim()) {
       try {
+        console.log("Playing audio for book:", book.title, "Audio link:", book.audioLink);
         const audio = new Audio(book.audioLink);
         audioRef.current = audio;
+        
+        // Set audio properties
+        audio.preload = 'auto';
+        audio.volume = 1.0;
 
+        // Handle audio events
         audio.onended = () => {
+          console.log("Audio playback ended");
           stopSample();
         };
 
         audio.onerror = (error) => {
           console.error("Audio playback error:", error);
+          console.error("Audio source:", book.audioLink);
+          console.error("Audio readyState:", audio.readyState);
           stopSample();
           // Fallback to text-to-speech if audio fails
           playTextToSpeech(book);
         };
 
-        audio.oncanplay = () => {
-          audio.play().catch((error) => {
-            console.error("Error playing audio:", error);
-            stopSample();
-            playTextToSpeech(book);
-          });
-        };
-
-        setPlayingId(bookId);
+        // Try to play immediately (user interaction allows this)
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log("Audio playback started successfully");
+              setPlayingId(bookId);
+            })
+            .catch((error) => {
+              console.error("Error playing audio:", error);
+              // If play fails, wait for canplay and try again
+              audio.oncanplay = () => {
+                audio.play()
+                  .then(() => {
+                    console.log("Audio playback started after canplay");
+                    setPlayingId(bookId);
+                  })
+                  .catch((err) => {
+                    console.error("Error playing audio after canplay:", err);
+                    stopSample();
+                    playTextToSpeech(book);
+                  });
+              };
+              // Start loading
+              audio.load();
+            });
+        } else {
+          // Fallback if play() doesn't return a promise
+          audio.oncanplay = () => {
+            audio.play().catch((error) => {
+              console.error("Error playing audio:", error);
+              stopSample();
+              playTextToSpeech(book);
+            });
+          };
+          audio.load();
+          setPlayingId(bookId);
+        }
       } catch (error) {
         console.error("Error creating audio element:", error);
         playTextToSpeech(book);
       }
     } else {
       // Fallback to text-to-speech if no audioLink
+      console.log("No audioLink for book:", book.title);
       playTextToSpeech(book);
     }
 
