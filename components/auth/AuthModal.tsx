@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setAuthModalOpen, setError, setLoading } from "@/store/slices/authSlice";
@@ -11,11 +12,14 @@ import {
   signOut,
   sendPasswordResetEmail,
   signInWithPopup,
+  signInAnonymously,
 } from "firebase/auth";
 import Image from "next/image";
 import styles from "./AuthModal.module.css";
 
 export default function AuthModal() {
+  const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useDispatch();
   const { isAuthModalOpen, isLoading, user, error } = useSelector((s: RootState) => s.auth);
   const [tab, setTab] = useState<"login" | "register" | "reset">("login");
@@ -67,6 +71,10 @@ export default function AuthModal() {
       await signInWithEmailAndPassword(authInstance, email, password);
       console.log("Login successful");
       close();
+      // Redirect to /for-you if on home or choose-plan page, otherwise stay on current page
+      if (pathname === "/" || pathname === "/choose-plan") {
+        router.push("/for-you");
+      }
     } catch (e: any) {
       console.error("Login error:", e);
       dispatch(setError(e?.message || "Login failed"));
@@ -94,6 +102,10 @@ export default function AuthModal() {
       await createUserWithEmailAndPassword(authInstance, email, password);
       console.log("Registration successful");
       close();
+      // Redirect to /for-you if on home or choose-plan page, otherwise stay on current page
+      if (pathname === "/" || pathname === "/choose-plan") {
+        router.push("/for-you");
+      }
     } catch (e: any) {
       console.error("Registration error:", e);
       dispatch(setError(e?.message || "Registration failed"));
@@ -117,10 +129,15 @@ export default function AuthModal() {
     dispatch(setError(null));
     
     try {
-      console.log("Attempting guest login...");
-      await signInWithEmailAndPassword(authInstance, "guest@gmail.com", "guest123");
+      console.log("Attempting anonymous guest login...");
+      // Use Firebase anonymous authentication - no credentials needed
+      await signInAnonymously(authInstance);
       console.log("Guest login successful");
       close();
+      // Redirect to /for-you if on home or choose-plan page, otherwise stay on current page
+      if (pathname === "/" || pathname === "/choose-plan") {
+        router.push("/for-you");
+      }
     } catch (e: any) {
       console.error("Guest login error:", e);
       dispatch(setError(e?.message || "Guest login failed"));
@@ -149,6 +166,10 @@ export default function AuthModal() {
       await signInWithPopup(authInstance, googleProvider);
       console.log("Google sign in successful");
       close();
+      // Redirect to /for-you if on home or choose-plan page, otherwise stay on current page
+      if (pathname === "/" || pathname === "/choose-plan") {
+        router.push("/for-you");
+      }
     } catch (e: any) {
       console.error("Google sign in error:", e);
       if (e?.code !== "auth/popup-closed-by-user" && e?.code !== "auth/cancelled-popup-request") {

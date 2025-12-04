@@ -21,12 +21,12 @@ import {
 import styles from "./Sidebar.module.css";
 
 const menuItems = [
-  { icon: FiHome, label: "For you", path: "/for-you", disabled: false },
-  { icon: FiBookmark, label: "Library", path: "/library", disabled: false },
-  { icon: FiEdit3, label: "Highlights", path: "#", disabled: true },
-  { icon: FiSearch, label: "Search", path: "#", disabled: true },
-  { icon: FiSettings, label: "Settings", path: "/settings", disabled: false },
-  { icon: FiHelpCircle, label: "Help & Support", path: "#", disabled: true },
+  { icon: FiHome, label: "For you", path: "/for-you" },
+  { icon: FiBookmark, label: "Library", path: "/library" },
+  { icon: FiEdit3, label: "Highlights", path: "/highlights" },
+  { icon: FiSearch, label: "Search", path: "/search" },
+  { icon: FiSettings, label: "Settings", path: "/settings" },
+  { icon: FiHelpCircle, label: "Help & Support", path: "/help-support" },
 ];
 
 export default function Sidebar() {
@@ -67,27 +67,13 @@ export default function Sidebar() {
       <nav className={styles.menu}>
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = !item.disabled && pathname === item.path;
+          const isActive = pathname === item.path;
           const linkClassName = [
             styles.link,
             isActive ? styles.linkActive : "",
-            item.disabled ? styles.linkDisabled : "",
           ]
             .filter(Boolean)
             .join(" ");
-
-          if (item.disabled) {
-            return (
-              <div
-                key={item.label}
-                className={linkClassName}
-                style={{ cursor: 'not-allowed' }}
-              >
-                <Icon className={styles.icon} />
-                <span>{item.label}</span>
-              </div>
-            );
-          }
 
           return (
             <Link

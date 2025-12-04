@@ -68,11 +68,16 @@ export default function BookDetailPage() {
         return;
       }
 
-      // Decode the ID in case it was URL-encoded
-      let decodedId: string;
+      // Next.js already decodes URL params, but handle edge cases
+      // Try using the ID as-is first, then decode if needed
+      let decodedId: string = bookId;
       try {
-        decodedId = decodeURIComponent(bookId);
+        // Only decode if it looks like it might be encoded
+        if (bookId.includes('%')) {
+          decodedId = decodeURIComponent(bookId);
+        }
       } catch {
+        // If decoding fails, use the original ID
         decodedId = bookId;
       }
 

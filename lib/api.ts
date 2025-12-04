@@ -35,12 +35,9 @@ export const getBookById = async (id: string): Promise<Book> => {
     const encodedId = encodeURIComponent(id);
     const url = `${BASE_URL}/getBook?id=${encodedId}`;
     
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    // Use simple fetch without headers to avoid CORS preflight issues
+    // Match the pattern used in getBooksByStatus which works
+    const response = await fetch(url);
     
     if (!response.ok) {
       if (response.status === 404) {

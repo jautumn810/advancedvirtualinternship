@@ -251,8 +251,8 @@ export default function LibraryPage() {
               {savedBooks.length > 0 && (
                 <span className={styles.sectionCount}>
                   {searchQuery.trim()
-                    ? `${filteredSavedBooks.length} of ${savedBooks.length} ${filteredSavedBooks.length === 1 ? 'item' : 'items'}`
-                    : `${savedBooks.length} ${savedBooks.length === 1 ? 'item' : 'items'}`}
+                    ? `${filteredSavedBooks.length} of ${savedBooks.length} saved`
+                    : `${savedBooks.length} saved`}
                 </span>
               )}
             </div>
@@ -291,8 +291,8 @@ export default function LibraryPage() {
               {finishedBooks.length > 0 && (
                 <span className={styles.sectionCount}>
                   {searchQuery.trim()
-                    ? `${filteredFinishedBooks.length} of ${finishedBooks.length} ${filteredFinishedBooks.length === 1 ? 'item' : 'items'}`
-                    : `${finishedBooks.length} ${finishedBooks.length === 1 ? 'item' : 'items'}`}
+                    ? `${filteredFinishedBooks.length} of ${finishedBooks.length} finished`
+                    : `${finishedBooks.length} finished`}
                 </span>
               )}
             </div>
