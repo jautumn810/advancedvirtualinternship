@@ -104,6 +104,18 @@
   transform: translateY(6px);
 }
 
+.menuToggleIconOpen {
+  background-color: transparent;
+}
+
+.menuToggleIconOpen::before {
+  transform: translateY(0) rotate(45deg);
+}
+
+.menuToggleIconOpen::after {
+  transform: translateY(0) rotate(-45deg);
+}
+
 .mobileMenu {
   display: none;
   flex-direction: column;

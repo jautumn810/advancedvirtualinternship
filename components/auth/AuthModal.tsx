@@ -32,8 +32,7 @@ export default function AuthModal() {
       await signInWithEmailAndPassword(auth, email, password);
       close();
     } catch (e: any) {
-      console.log("Login attempt:", e?.message ?? "Login failed");
-      // Error handled silently
+      dispatch(setError(e?.message ?? "Login failed. Please try again."));
     } finally {
       dispatch(setLoading(false));
     }
@@ -46,8 +45,7 @@ export default function AuthModal() {
       await createUserWithEmailAndPassword(auth, email, password);
       close();
     } catch (e: any) {
-      console.log("Registration attempt:", e?.message ?? "Registration failed");
-      // Error handled silently
+      dispatch(setError(e?.message ?? "Registration failed. Please try again."));
     } finally {
       dispatch(setLoading(false));
     }
@@ -60,8 +58,7 @@ export default function AuthModal() {
       await signInWithEmailAndPassword(auth, "guest@gmail.com", "guest123");
       close();
     } catch (e: any) {
-      console.log("Guest login attempt:", e?.message ?? "Guest login failed");
-      // Error handled silently
+      dispatch(setError(e?.message ?? "Guest login failed. Please try again."));
     } finally {
       dispatch(setLoading(false));
     }
@@ -74,17 +71,25 @@ export default function AuthModal() {
       await signInWithPopup(auth, googleProvider);
       close();
     } catch (e: any) {
+      // Don't show error if user closed the popup (expected behavior)
       if (e?.code !== "auth/popup-closed-by-user") {
-        console.log("Google sign-in attempt:", e?.message ?? "Google sign-in failed");
+        dispatch(setError(e?.message ?? "Google sign-in failed. Please try again."));
       }
-      // Error handled silently (popup close is expected behavior)
     } finally {
       dispatch(setLoading(false));
     }
   };
 
   const onLogout = async () => {
-    await signOut(auth);
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+    try {
+      await signOut(auth);
+    } catch (e: any) {
+      dispatch(setError(e?.message ?? "Logout failed. Please try again."));
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   const onResetPassword = async () => {
@@ -97,7 +102,7 @@ export default function AuthModal() {
       await sendPasswordResetEmail(auth, email);
       setResetSent(true);
     } catch (e: any) {
-      console.log("Password reset attempt:", e?.message ?? "Failed to send reset email");
+      dispatch(setError(e?.message ?? "Failed to send reset email. Please try again."));
       // Error handled silently
     } finally {
       dispatch(setLoading(false));

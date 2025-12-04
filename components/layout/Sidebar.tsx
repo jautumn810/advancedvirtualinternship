@@ -33,9 +33,14 @@ export default function Sidebar() {
   const dispatch = useDispatch();
   const { user } = useSelector((s: RootState) => s.auth);
 
-  const handleAuth = () => {
+  const handleAuth = async () => {
     if (user) {
-      signOut(auth);
+      try {
+        await signOut(auth);
+      } catch (error) {
+        console.error("Logout failed:", error);
+        // Error is handled by Firebase auth state listener
+      }
     } else {
       dispatch(setAuthModalOpen(true));
     }

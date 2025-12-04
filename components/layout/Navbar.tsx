@@ -33,7 +33,12 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setMenuOpen(false);
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Error is handled by Firebase auth state listener
+    }
   };
 
   return (
@@ -92,8 +97,9 @@ export default function Navbar() {
           className={styles.menuToggle}
           onClick={() => setMenuOpen((prev) => !prev)}
           aria-label="Toggle navigation"
+          aria-expanded={isMenuOpen}
         >
-          <span className={styles.menuToggleIcon} />
+          <span className={`${styles.menuToggleIcon} ${isMenuOpen ? styles.menuToggleIconOpen : ""}`} />
         </button>
       </div>
 

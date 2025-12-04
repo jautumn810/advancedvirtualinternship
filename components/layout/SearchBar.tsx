@@ -85,7 +85,6 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
           }
         }
       } catch (error: any) {
-        console.error("Search error:", error);
         // Only show error if we have no local books to search
         if (!localBooks || localBooks.length === 0) {
           dispatch(setError(error.message || "Search failed. Please try again."));
@@ -131,6 +130,7 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className={styles.input}
+        aria-label="Search for books"
       />
     </div>
   );
