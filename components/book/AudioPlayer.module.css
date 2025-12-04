@@ -1,0 +1,211 @@
+.player {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.player.persistent {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: 280px;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 24px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  height: 80px;
+}
+
+.bookInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.coverThumbnail {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #dfe7f3;
+}
+
+.coverImage {
+  object-fit: cover;
+}
+
+.bookDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.bookTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #032b41;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookAuthor {
+  font-size: 12px;
+  color: #4a5d6d;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progressContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.currentTime {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5d6d;
+  min-width: 40px;
+  text-align: left;
+}
+
+.progressBar {
+  flex: 1;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 0;
+}
+
+.progressBar::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #032b41;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.progressBar::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #032b41;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.duration {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a5d6d;
+  min-width: 40px;
+  text-align: right;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.skipButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #032b41;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  gap: 2px;
+  position: relative;
+}
+
+.skipButton:hover {
+  background: #f6f8fb;
+}
+
+.skipButton:active {
+  transform: scale(0.95);
+}
+
+.skipButton svg {
+  font-size: 16px;
+}
+
+.skipLabel {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.playButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #032b41;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(3, 43, 65, 0.3);
+}
+
+.playButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(3, 43, 65, 0.4);
+}
+
+.playButton:active {
+  transform: translateY(0);
+}
+
+.playButton svg {
+  font-size: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .player.persistent {
+    margin-left: 0;
+  }
+}
+

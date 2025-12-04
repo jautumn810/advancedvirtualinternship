@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Book } from "@/types";
 import { formatDuration } from "@/lib/audio";
-import { FiTrash2 } from "react-icons/fi";
+import { FiTrash2, FiClock, FiStar } from "react-icons/fi";
 import styles from "./LibraryBookCard.module.css";
 
 interface LibraryBookCardProps {
@@ -29,46 +29,67 @@ export default function LibraryBookCard({
     setImageSrc(book.imageLink || FALLBACK_IMAGE);
   }, [book.imageLink]);
 
+  const ratingDisplay = book.averageRating && !Number.isNaN(book.averageRating)
+    ? book.averageRating.toFixed(1)
+    : null;
+
+  const durationDisplay = duration !== undefined && duration > 0
+    ? formatDuration(duration)
+    : null;
+
   return (
-    <Link href={`/book/${encodeURIComponent(book.id)}`} className={styles.card}>
-      {book.subscriptionRequired && <div className={styles.badge}>Premium</div>}
-      <div className={styles.imageWrap}>
-        <Image
-          src={imageSrc}
-          alt={book.title}
-          fill
-          className={styles.image}
-          sizes="(max-width: 768px) 50vw, 33vw"
-          onError={() => {
-            if (imageSrc !== FALLBACK_IMAGE) {
-              setImageSrc(FALLBACK_IMAGE);
-            }
-          }}
-        />
-        {duration !== undefined && duration > 0 && (
-          <div className={styles.duration}>{formatDuration(duration)}</div>
-        )}
-        {onRemove && (
-          <button
-            type="button"
-            aria-label="Remove from library"
-            className={styles.removeButton}
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              onRemove();
+    <div className={styles.card}>
+      <Link href={`/book/${encodeURIComponent(book.id)}`} className={styles.cardLink}>
+        <div className={styles.imageWrap}>
+          <Image
+            src={imageSrc}
+            alt={book.title}
+            fill
+            className={styles.image}
+            sizes="120px"
+            onError={() => {
+              if (imageSrc !== FALLBACK_IMAGE) {
+                setImageSrc(FALLBACK_IMAGE);
+              }
             }}
-            disabled={isRemoving}
-          >
-            <FiTrash2 className={isRemoving ? styles.spinner : undefined} />
-          </button>
-        )}
-      </div>
-      <div className={styles.meta}>
-        <h3 className={styles.title}>{book.title}</h3>
-        <p className={styles.author}>{book.author}</p>
-      </div>
-    </Link>
+          />
+        </div>
+        <div className={styles.content}>
+          <h3 className={styles.title}>{book.title}</h3>
+          <p className={styles.author}>{book.author}</p>
+          {book.subTitle && (
+            <p className={styles.subtitle}>{book.subTitle}</p>
+          )}
+          <div className={styles.metrics}>
+            {durationDisplay && (
+              <span className={styles.metric}>
+                <FiClock aria-hidden="true" /> {durationDisplay}
+              </span>
+            )}
+            {ratingDisplay && (
+              <span className={styles.metric}>
+                <FiStar aria-hidden="true" /> {ratingDisplay}
+              </span>
+            )}
+          </div>
+        </div>
+      </Link>
+      {onRemove && (
+        <button
+          type="button"
+          aria-label="Remove from library"
+          className={styles.removeButton}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onRemove();
+          }}
+          disabled={isRemoving}
+        >
+          <FiTrash2 className={isRemoving ? styles.spinner : undefined} />
+        </button>
+      )}
+    </div>
   );
 }
 

@@ -1,0 +1,136 @@
+.page {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.content {
+  flex: 1;
+  margin-left: 280px;
+  padding: 72px 72px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.description {
+  font-size: 15px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 48px 28px;
+  border-radius: 16px;
+  border: 1px solid #dde9fb;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(12, 35, 71, 0.06);
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #e5effc;
+  background: #f7fbff;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(12, 35, 71, 0.08);
+}
+
+.cardIcon {
+  font-size: 32px;
+  color: var(--color-primary);
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.cardText {
+  font-size: 15px;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.helpContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 48px 24px;
+}
+
+.helpIcon {
+  font-size: 64px;
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+.helpTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.helpText {
+  font-size: 15px;
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+  .content {
+    margin-left: 0;
+    padding: 64px 48px 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 56px 24px 80px;
+    gap: 48px;
+  }
+
+  .section {
+    padding: 32px 24px;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+

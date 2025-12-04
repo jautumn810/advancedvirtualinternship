@@ -222,8 +222,23 @@ export default function ChoosePlanPage() {
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
+  const { subscription } = useSelector((state: RootState) => state.subscription);
 
   const stripePromiseValue = useMemo(() => getStripe(), []);
+
+  // Get subscription status
+  const subscriptionStatus = useMemo(() => {
+    if (!subscription || subscription.status !== "active") {
+      return null;
+    }
+    if (subscription.type === "premium-plus") {
+      return "Premium Plus";
+    }
+    if (subscription.type === "premium") {
+      return "Premium";
+    }
+    return null;
+  }, [subscription]);
 
   const closeCheckout = useCallback(() => {
     setIsCheckoutOpen(false);
@@ -304,6 +319,23 @@ export default function ChoosePlanPage() {
       </section>
 
       <div className={styles.content}>
+        {user && (
+          <section className={styles.accountInfo}>
+            {user.email && (
+              <div className={styles.accountItem}>
+                <span className={styles.accountLabel}>Email:</span>
+                <span className={styles.accountValue}>{user.email}</span>
+              </div>
+            )}
+            {subscriptionStatus && (
+              <div className={styles.accountItem}>
+                <span className={styles.accountLabel}>Current Plan:</span>
+                <span className={styles.accountValue}>{subscriptionStatus}</span>
+              </div>
+            )}
+          </section>
+        )}
+
         <section className={styles.highlights}>
           {[
             {

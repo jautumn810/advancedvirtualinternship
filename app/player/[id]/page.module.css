@@ -11,6 +11,7 @@
   display: flex;
   flex-direction: column;
   gap: 48px;
+  padding-bottom: 100px;
 }
 
 .toolbar {
@@ -276,6 +277,11 @@
   font-size: 16px;
   color: #4a5d6d;
   line-height: 1.75;
+}
+
+.summaryText {
+  white-space: pre-line;
+  margin: 0;
 }
 
 .errorCard,

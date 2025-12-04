@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { FiBook, FiCheckCircle } from "react-icons/fi";
 import Sidebar from "@/components/layout/Sidebar";
 import SearchBar from "@/components/layout/SearchBar";
-import BookCard from "@/components/book/BookCard";
 import LibraryBookCard from "@/components/book/LibraryBookCard";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import {
@@ -157,7 +156,7 @@ export default function LibraryPage() {
   );
 
   const renderLibraryGrid = (books: LibraryBook[]) => (
-    <div className={styles.grid}>
+    <div className={styles.list}>
       {books.map((book) => (
         <LibraryBookCard
           key={book.id}
@@ -171,9 +170,13 @@ export default function LibraryPage() {
   );
 
   const renderFinishedGrid = (books: FinishedBook[]) => (
-    <div className={styles.grid}>
+    <div className={styles.list}>
       {books.map((book) => (
-        <BookCard key={book.id} book={book} duration={durations[book.id]} />
+        <LibraryBookCard
+          key={book.id}
+          book={book}
+          duration={durations[book.id]}
+        />
       ))}
     </div>
   );
@@ -248,8 +251,8 @@ export default function LibraryPage() {
               {savedBooks.length > 0 && (
                 <span className={styles.sectionCount}>
                   {searchQuery.trim()
-                    ? `${filteredSavedBooks.length} of ${savedBooks.length} saved`
-                    : `${savedBooks.length} saved`}
+                    ? `${filteredSavedBooks.length} of ${savedBooks.length} ${filteredSavedBooks.length === 1 ? 'item' : 'items'}`
+                    : `${savedBooks.length} ${savedBooks.length === 1 ? 'item' : 'items'}`}
                 </span>
               )}
             </div>
@@ -284,12 +287,12 @@ export default function LibraryPage() {
               <FiCheckCircle />
             </span>
             <div>
-              <h2 className={styles.sectionTitle}>Finished Books</h2>
+              <h2 className={styles.sectionTitle}>Finished</h2>
               {finishedBooks.length > 0 && (
                 <span className={styles.sectionCount}>
                   {searchQuery.trim()
-                    ? `${filteredFinishedBooks.length} of ${finishedBooks.length} finished`
-                    : `${finishedBooks.length} finished`}
+                    ? `${filteredFinishedBooks.length} of ${finishedBooks.length} ${filteredFinishedBooks.length === 1 ? 'item' : 'items'}`
+                    : `${finishedBooks.length} ${finishedBooks.length === 1 ? 'item' : 'items'}`}
                 </span>
               )}
             </div>

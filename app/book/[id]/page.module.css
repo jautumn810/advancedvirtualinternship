@@ -76,39 +76,31 @@
   gap: 16px;
 }
 
-.primaryButton,
-.secondaryButton {
+.primaryButton {
   min-width: 140px;
   padding: 14px 28px;
   border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
-  transition: transform 120ms ease, box-shadow 120ms ease;
-}
-
-.primaryButton {
-  background: #022c41;
+  background: #032b41;
   color: #ffffff;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
 .primaryButton:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .primaryButton:not(:disabled):hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(3, 44, 65, 0.18);
-}
-
-.secondaryButton {
-  background: transparent;
-  border: 1px solid #022c41;
-  color: #022c41;
-}
-
-.secondaryButton:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(3, 44, 65, 0.12);
+  background: #053f5e;
 }
 
 .actionRow {
@@ -116,6 +108,31 @@
   gap: 12px;
   margin-top: 12px;
   flex-wrap: wrap;
+}
+
+.libraryLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #0365f2;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-decoration: none;
+}
+
+.libraryLink:hover:not(:disabled) {
+  color: #0252cc;
+  text-decoration: underline;
+}
+
+.libraryLink:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .actionButton {
@@ -142,16 +159,6 @@
 .actionButton:disabled {
   cursor: not-allowed;
   opacity: 0.6;
-}
-
-.actionButton.bookmarked {
-  background: #e8f5e9;
-  border-color: #0f9f59;
-  color: #0f9f59;
-}
-
-.actionButton.bookmarked:hover:not(:disabled) {
-  background: #d4edda;
 }
 
 .shareContainer {
@@ -215,10 +222,31 @@
   width: 100%;
   max-width: 260px;
   aspect-ratio: 3 / 4;
+  overflow: visible;
+  z-index: 1;
+}
+
+.coverImage {
+  position: relative;
+  width: 100%;
+  height: 100%;
   border-radius: 28px;
   overflow: hidden;
   box-shadow: 0 25px 50px rgba(10, 30, 60, 0.15);
   background: #dfe8f2;
+}
+
+.coverWrap::after {
+  content: "";
+  position: absolute;
+  bottom: -150px;
+  right: -100px;
+  width: 600px;
+  height: 300px;
+  border-radius: 50% 50% 0 0;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.25), rgba(220, 38, 38, 0.15));
+  z-index: -1;
+  pointer-events: none;
 }
 
 .premiumBadge {
@@ -243,37 +271,33 @@
 
 .section {
   background: #ffffff;
-  border-radius: 28px;
+  border-radius: 16px;
   padding: 32px 36px;
-  box-shadow: 0 24px 40px rgba(12, 35, 71, 0.05);
-  border: 1px solid #e2e9f0;
+  box-shadow: 0 2px 8px rgba(12, 35, 71, 0.06);
+  border: 1px solid #dde9fb;
 }
 
 .sectionTitle {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #032b41;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
 }
 
 .sectionBody {
-  font-size: 16px;
-  line-height: 1.7;
-  color: #425971;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4a5d6d;
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.summaryContent {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.summaryContent p {
+.descriptionText {
   margin: 0;
-  line-height: 1.8;
+  line-height: 1.6;
+  color: #4a5d6d;
 }
 
 .authorInfo {
@@ -304,16 +328,17 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  margin-top: 12px;
+  margin: 20px 0;
 }
 
 .tag {
-  padding: 10px 18px;
-  border-radius: 12px;
-  background: #eef5ff;
-  color: #0d3a67;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #f0f0f0;
+  color: #4a5d6d;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
+  border: none;
 }
 
 .errorWrapper,

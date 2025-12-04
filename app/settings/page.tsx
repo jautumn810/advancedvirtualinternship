@@ -1,16 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
 import { setAuthModalOpen } from "@/store/slices/authSlice";
 import Sidebar from "@/components/layout/Sidebar";
 import SearchBar from "@/components/layout/SearchBar";
-import { FiMail, FiUser, FiCreditCard } from "react-icons/fi";
-import Link from "next/link";
+import { SkeletonText } from "@/components/ui/Skeleton";
+import { FiCreditCard } from "react-icons/fi";
 import styles from "./page.module.css";
 import typographyStyles from "@/styles/components/typography.module.css";
-import buttonStyles from "@/styles/components/button.module.css";
 
 export default function SettingsPage() {
   const dispatch = useDispatch();
@@ -34,19 +34,27 @@ export default function SettingsPage() {
       <div className={styles.page}>
         <Sidebar />
         <main className={styles.content}>
-          <SearchBar />
+          <div className={styles.toolbar}>
+            <SearchBar />
+          </div>
+          <h1 className={styles.title}>Settings</h1>
           <div className={styles.loginCard}>
-            <FiUser className={styles.loginIcon} />
-            <h2 className={styles.loginTitle}>Please log in</h2>
-            <p className={styles.loginBody}>
-              Sign in to manage your account preferences and subscription status.
-            </p>
+            <div className={styles.illustration}>
+              <Image
+                src="/login.png"
+                alt="Log in illustration"
+                fill
+                sizes="(max-width: 600px) 80vw, 440px"
+                className={styles.illustrationImage}
+              />
+            </div>
+            <p className={styles.loginText}>Log in to your account to see your details.</p>
             <button
               type="button"
               onClick={handleLogin}
-              className={`${buttonStyles.btn} ${buttonStyles.btnPrimary} ${buttonStyles.md}`}
+              className={styles.loginButton}
             >
-              Log in
+              Login
             </button>
           </div>
         </main>
@@ -70,83 +78,44 @@ export default function SettingsPage() {
     <div className={styles.page}>
       <Sidebar />
       <main className={styles.content}>
-        <SearchBar />
-        <header className={styles.header}>
-          <h1 className={`${typographyStyles.h2} ${styles.title}`}>Settings</h1>
-          <p className={styles.ctaNote}>
-            Manage your account details and subscription preferences.
-          </p>
-        </header>
+        <div className={styles.toolbar}>
+          <SearchBar />
+        </div>
+        <h1 className={styles.title}>Settings</h1>
 
-        <section className={styles.cards}>
-          <article className={styles.card}>
-            <div className={styles.cardHeader}>
-              <span className={styles.cardIcon}>
-                <FiMail />
-              </span>
-              <div>
-                <h2 className={styles.cardTitle}>Email address</h2>
-                <p className={styles.cardBody}>{user.email}</p>
-              </div>
-            </div>
-          </article>
-
-          <article className={styles.card}>
-            <div className={styles.cardHeader}>
-              <span className={styles.cardIcon}>
-                <FiCreditCard />
-              </span>
-              <div>
-                <div className={styles.ctaRow}>
-                  <h2 className={styles.cardTitle}>Subscription</h2>
-                  {isSubscribed && <span className={styles.badge}>Active</span>}
+        <section className={styles.subscriptionCard}>
+          <div className={styles.cardHeader}>
+            <span className={styles.cardIcon}>
+              <FiCreditCard />
+            </span>
+            <div className={styles.cardContent}>
+              <h2 className={styles.cardTitle}>Subscription</h2>
+              {isSubscriptionLoading ? (
+                <div className={styles.skeletonWrapper}>
+                  <SkeletonText lines={1} />
                 </div>
-                {isSubscriptionLoading ? (
-                  <p className={styles.cardBody}>Loading subscription...</p>
-                ) : (
-                  <p className={styles.cardBody}>
-                    Current plan: {subscriptionStatus}
-                  </p>
-                )}
-                {subscriptionError && (
-                  <p className={styles.errorMessage}>{subscriptionError}</p>
-                )}
-              </div>
+              ) : (
+                <p className={styles.cardBody}>
+                  Current plan: {subscriptionStatus}
+                </p>
+              )}
+              {subscriptionError && (
+                <p className={styles.errorMessage}>{subscriptionError}</p>
+              )}
             </div>
+          </div>
 
-            {!isSubscribed ? (
-              <div className={styles.cta}>
-                <button
-                  type="button"
-                  onClick={handleUpgrade}
-                  className={`${buttonStyles.btn} ${buttonStyles.btnPrimary} ${buttonStyles.md}`}
-                >
-                  Upgrade plan
-                </button>
-                <p className={styles.ctaNote}>
-                  Upgrade to Premium or Premium Plus to unlock the full Summarist library and features.
-                </p>
-              </div>
-            ) : (
-              <div className={styles.cta}>
-                <p className={styles.ctaNote}>
-                  ✅ You have an active {subscriptionStatus} subscription. Enjoy unlimited listening and summaries.
-                </p>
-              </div>
-            )}
-          </article>
-
-          <article className={styles.card}>
-            <h2 className={styles.cardTitle}>Account information</h2>
-            <p className={styles.cardBody}>
-              Your account is secured with email authentication. To manage your subscription or update payment methods,
-              visit the{" "}
-              <Link href="/choose-plan" className={buttonStyles.btnLink}>
-                Choose Plan
-              </Link>{" "}
-              page.
-            </p>
-          </article>
+          {!isSubscribed && (
+            <div className={styles.upgradeSection}>
+              <button
+                type="button"
+                onClick={handleUpgrade}
+                className={styles.upgradeButton}
+              >
+                Upgrade plan
+              </button>
+            </div>
+          )}
         </section>
       </main>
     </div>

@@ -28,7 +28,7 @@ export async function getAudioDuration(audioUrl: string): Promise<number> {
  * @returns Formatted string like "4:52" or "1:23:45"
  */
 export function formatDuration(seconds: number): string {
-  if (isNaN(seconds) || seconds < 0) return "0:00";
+  if (isNaN(seconds) || seconds < 0) return "00:00";
   
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -38,6 +38,6 @@ export function formatDuration(seconds: number): string {
     return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }
   
-  return `${minutes}:${secs.toString().padStart(2, "0")}`;
+  return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
 

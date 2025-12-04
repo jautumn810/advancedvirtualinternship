@@ -73,49 +73,36 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
       dispatch(setError(null));
       
       try {
-        const books = await searchBooks(debouncedSearchQuery, localBooks);
+        // Use the API endpoint directly
+        const response = await fetch(
+          `https://us-central1-summaristt.cloudfunctions.net/getBooksByAuthorOrTitle?search=${encodeURIComponent(debouncedSearchQuery.trim())}`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        const books = Array.isArray(data) ? data : [];
+        
         dispatch(setSearchResults(books));
-        if (books.length === 0) {
-          // Don't show error if no results, just empty array
-          dispatch(setError(null));
-        } else {
-          // Navigate to for-you page to show search results if not already there
-          if (pathname !== "/for-you" && !localFilterMode) {
-            router.push("/for-you");
-          }
+        dispatch(setError(null));
+        
+        // Navigate to for-you page to show search results if not already there
+        if (books.length > 0 && pathname !== "/for-you" && !localFilterMode) {
+          router.push("/for-you");
         }
       } catch (error: any) {
-        // Only show error if we have no local books to search
-        if (!localBooks || localBooks.length === 0) {
-          dispatch(setError(error.message || "Search failed. Please try again."));
-        } else {
-          // If we have local books, search them even if API fails
-          try {
-            const localMatches = localBooks.filter((book: Book) => {
-              const query = debouncedSearchQuery.toLowerCase().trim();
-              const title = book.title.toLowerCase();
-              const author = book.author.toLowerCase();
-              const subTitle = book.subTitle?.toLowerCase() || '';
-              return title.includes(query) || author.includes(query) || subTitle.includes(query);
-            });
-            dispatch(setSearchResults(localMatches));
-            dispatch(setError(null));
-            // Navigate to for-you page to show search results if not already there
-            if (localMatches.length > 0 && pathname !== "/for-you" && !localFilterMode) {
-              router.push("/for-you");
-            }
-          } catch (localError) {
-            dispatch(setError("Search failed. Please try again."));
-            dispatch(setSearchResults([]));
-          }
-        }
+        console.error("Search error:", error);
+        dispatch(setError(error.message || "Search failed. Please try again."));
+        dispatch(setSearchResults([]));
       } finally {
         dispatch(setLoading(false));
       }
     };
 
     performSearch();
-  }, [debouncedSearchQuery, dispatch, shouldHide, localBooks, localFilterMode, pathname, router]);
+  }, [debouncedSearchQuery, dispatch, shouldHide, localFilterMode, pathname, router]);
 
   if (shouldHide) {
     return null;

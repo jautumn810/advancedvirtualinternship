@@ -271,15 +271,6 @@ export default function PlayerPage() {
               </div>
             </section>
 
-            <section className={styles.playerPanel}>
-              <div className={styles.playerHeader}>
-                <h2 className={styles.playerTitle}>Listen now</h2>
-                {book.audioLength && (
-                  <span className={styles.playerMeta}>{book.audioLength} minute audio</span>
-                )}
-              </div>
-              <AudioPlayer audioLink={book.audioLink} onFinish={handleAudioFinish} />
-            </section>
 
             {keyIdeas.length > 0 && (
               <section className={styles.playerPanel}>
@@ -298,19 +289,29 @@ export default function PlayerPage() {
               </section>
             )}
 
-            {summaryParagraphs.length > 0 && (
+            {book.summary && (
               <section className={styles.summarySection}>
                 <h2 className={styles.summaryTitle}>Summary</h2>
                 <div className={styles.summaryBody}>
-                  {summaryParagraphs.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
+                  <p className={styles.summaryText}>{book.summary}</p>
                 </div>
               </section>
             )}
           </>
         )}
       </main>
+      
+      {/* Persistent Audio Player Bar */}
+      {book && book.audioLink && (
+        <AudioPlayer 
+          audioLink={book.audioLink} 
+          bookCover={coverSrc}
+          bookTitle={book.title}
+          bookAuthor={book.author}
+          onFinish={handleAudioFinish}
+          isPersistent={true}
+        />
+      )}
     </div>
   );
 }

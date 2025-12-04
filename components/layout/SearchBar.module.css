@@ -2,19 +2,21 @@
   position: relative;
   width: 100%;
   max-width: 320px;
+  display: flex;
+  align-items: center;
 }
 
 .input {
   width: 100%;
-  border-radius: var(--radius-lg);
+  border-radius: 8px;
   border: 1px solid rgba(3, 43, 65, 0.12);
   background: #ffffff;
-  padding: 0.75rem 1rem 0.75rem 2.75rem;
-  font-size: var(--text-sm);
-  color: var(--color-text);
+  padding: 10px 16px 10px 40px;
+  font-size: 15px;
+  color: #032b41;
+  font-family: inherit;
   transition:
     border-color var(--transition-base),
-    background-color var(--transition-base),
     box-shadow var(--transition-base);
 }
 
@@ -24,17 +26,19 @@
 
 .input:focus {
   outline: none;
-  border-color: rgba(15, 159, 89, 0.55);
-  box-shadow: 0 0 0 3px rgba(15, 159, 89, 0.15);
+  border-color: rgba(3, 43, 65, 0.3);
+  box-shadow: 0 0 0 2px rgba(3, 43, 65, 0.08);
   background: #ffffff;
 }
 
 .icon {
   position: absolute;
-  left: 1rem;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: rgba(3, 43, 65, 0.4);
-  font-size: 1.1rem;
+  font-size: 18px;
+  pointer-events: none;
+  z-index: 1;
 }
 

@@ -15,10 +15,17 @@
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: var(--text-xl);
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.01em;
+}
+
+.brandIcon {
+  flex-shrink: 0;
 }
 
 .menu {
@@ -49,13 +56,26 @@
 
 .linkActive {
   color: var(--color-primary);
-  background: linear-gradient(120deg, rgba(15, 159, 89, 0.16), rgba(43, 217, 124, 0.1));
-  box-shadow: var(--shadow-sm);
+  background: rgba(15, 159, 89, 0.08);
+  position: relative;
+}
+
+.linkActive::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background: var(--color-primary);
+  border-radius: 0 2px 2px 0;
 }
 
 .linkDisabled {
   opacity: 0.4;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .linkDisabled:hover {

@@ -73,6 +73,36 @@
   z-index: 1;
 }
 
+.accountInfo {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px 32px;
+  border: 1px solid #dbe8fb;
+  box-shadow: 0 20px 40px rgba(12, 35, 71, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accountItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.accountLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: #4a5d6d;
+  min-width: 120px;
+}
+
+.accountValue {
+  font-size: 15px;
+  font-weight: 500;
+  color: #032b41;
+}
+
 .highlights {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

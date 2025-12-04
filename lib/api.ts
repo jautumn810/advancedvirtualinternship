@@ -116,10 +116,9 @@ export const searchBooks = async (search: string, localBooks?: Book[]): Promise<
   }
 
   const searchQuery = search.trim();
-  const allResults: Book[] = [];
 
   try {
-    // First, try the API search
+    // Use the API endpoint for searching books by author or title
     const apiResults = await retryRequest(async () => {
       const response = await fetch(
         `${BASE_URL}/getBooksByAuthorOrTitle?search=${encodeURIComponent(searchQuery)}`
@@ -131,24 +130,14 @@ export const searchBooks = async (search: string, localBooks?: Book[]): Promise<
       return Array.isArray(data) ? data : [];
     });
 
-    // Apply enhanced client-side filtering to API results
-    const filteredApiResults = apiResults.filter((book: Book) => matchesSearch(book, searchQuery));
-    allResults.push(...filteredApiResults);
-
-    // Also search through locally available books if provided
-    if (localBooks && localBooks.length > 0) {
-      const localMatches = localBooks.filter((book: Book) => matchesSearch(book, searchQuery));
-      allResults.push(...localMatches);
-    }
-
     // Remove duplicates based on book ID
     const uniqueBooks = Array.from(
-      new Map(allResults.map(book => [book.id, book])).values()
+      new Map(apiResults.map((book: Book) => [book.id, book])).values()
     );
 
     return uniqueBooks;
   } catch (error) {
-    // If API fails, search through local books only
+    // If API fails, search through local books only as fallback
     if (localBooks && localBooks.length > 0) {
       const localMatches = localBooks.filter((book: Book) => matchesSearch(book, searchQuery));
       return Array.from(

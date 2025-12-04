@@ -78,6 +78,12 @@
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 }
 
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .emptyCard {
   border-radius: var(--radius-lg);
   border: 1px solid #e5effc;

@@ -13,7 +13,7 @@ import SearchBar from "@/components/layout/SearchBar";
 import { SkeletonCard, SkeletonText } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import { formatDuration } from "@/lib/audio";
-import { FiStar, FiClock, FiBookOpen, FiBookmark, FiShare2, FiCopy, FiTwitter, FiFacebook, FiLinkedin } from "react-icons/fi";
+import { FiStar, FiClock, FiBookOpen, FiBookmark, FiShare2, FiCopy, FiTwitter, FiFacebook, FiLinkedin, FiMic, FiZap } from "react-icons/fi";
 import { addToLibrary, removeFromLibrary, getLibraryBooks } from "@/lib/library";
 import { getDbInstance } from "@/lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -95,6 +95,17 @@ export default function BookDetailPage() {
         }
         
         // Ensure all required fields have defaults
+        // Handle keyIdeas which can be a number or array
+        let normalizedKeyIdeas: Book['keyIdeas'];
+        if (Array.isArray(bookData.keyIdeas)) {
+          normalizedKeyIdeas = bookData.keyIdeas;
+        } else if (typeof bookData.keyIdeas === 'number') {
+          // If it's a number, create an empty array (we'll use the number for display)
+          normalizedKeyIdeas = [];
+        } else {
+          normalizedKeyIdeas = [];
+        }
+        
         const normalizedBook: Book = {
           id: bookData.id || decodedId,
           title: bookData.title || "Untitled Book",
@@ -105,7 +116,7 @@ export default function BookDetailPage() {
           audioLength: bookData.audioLength || 0,
           totalRating: bookData.totalRating || 0,
           averageRating: bookData.averageRating || 0,
-          keyIdeas: bookData.keyIdeas || [],
+          keyIdeas: normalizedKeyIdeas,
           type: bookData.type || "text",
           status: bookData.status || "suggested",
           subscriptionRequired: bookData.subscriptionRequired || false,
@@ -114,6 +125,11 @@ export default function BookDetailPage() {
           bookDescription: bookData.bookDescription || bookData.summary || "",
           authorDescription: bookData.authorDescription || "",
         };
+        
+        // Store the original keyIdeas value if it was a number
+        if (typeof bookData.keyIdeas === 'number') {
+          (normalizedBook as any).keyIdeasCount = bookData.keyIdeas;
+        }
         
         setBook(normalizedBook);
         setError(null);
@@ -387,7 +403,10 @@ export default function BookDetailPage() {
       : null;
 
   const durationDisplay = book.audioLink ? formatDuration(book.audioLength ?? 0) : null;
-  const keyIdeasCount = Array.isArray(book.keyIdeas) ? book.keyIdeas.length : 0;
+  // Handle keyIdeas - can be array or number from API
+  const keyIdeasCount = (book as any).keyIdeasCount 
+    ? (book as any).keyIdeasCount 
+    : (Array.isArray(book.keyIdeas) ? book.keyIdeas.length : 0);
   const formatLabel = getFormatLabel(book.type);
   const excerpt = getExcerpt(book);
 
@@ -419,11 +438,14 @@ export default function BookDetailPage() {
                 </span>
               )}
               <span className={styles.metric}>
-                <FiBookOpen aria-hidden="true" />
+                <FiMic aria-hidden="true" />
                 {formatLabel}
               </span>
               {keyIdeasCount > 0 && (
-                <span className={styles.metric}>{keyIdeasCount} Key ideas</span>
+                <span className={styles.metric}>
+                  <FiZap aria-hidden="true" />
+                  {keyIdeasCount} Key ideas
+                </span>
               )}
             </div>
 
@@ -433,26 +455,28 @@ export default function BookDetailPage() {
                 className={styles.primaryButton}
                 type="button"
               >
+                <FiBookOpen aria-hidden="true" />
                 Read
               </button>
               <button
                 onClick={() => handleReadListen("listen")}
-                className={styles.secondaryButton}
+                className={styles.primaryButton}
                 type="button"
               >
+                <FiMic aria-hidden="true" />
                 Listen
               </button>
             </div>
             <div className={styles.actionRow}>
               <button
                 onClick={handleToggleBookmark}
-                className={`${styles.actionButton} ${isBookmarked ? styles.bookmarked : ''}`}
+                className={styles.libraryLink}
                 type="button"
                 disabled={isAdding || isCheckingBookmark}
                 aria-label={isBookmarked ? "Remove from library" : "Add to library"}
               >
                 <FiBookmark aria-hidden="true" />
-                {isBookmarked ? "Saved" : "Save to Library"}
+                {isBookmarked ? "Remove from My Library" : "Add title to My Library"}
               </button>
               <div className={styles.shareContainer}>
                 <button
@@ -508,49 +532,38 @@ export default function BookDetailPage() {
             {book.subscriptionRequired && (
               <span className={styles.premiumBadge}>Premium</span>
             )}
-            <Image
-              src={coverSrc}
-              alt={book.title}
-              fill
-              sizes="(max-width: 768px) 60vw, 260px"
-              onError={() => {
-                if (coverSrc !== FALLBACK_IMAGE) {
-                  setCoverSrc(FALLBACK_IMAGE);
-                }
-              }}
-            />
+            <div className={styles.coverImage}>
+              <Image
+                src={coverSrc}
+                alt={book.title}
+                fill
+                sizes="(max-width: 768px) 60vw, 260px"
+                onError={() => {
+                  if (coverSrc !== FALLBACK_IMAGE) {
+                    setCoverSrc(FALLBACK_IMAGE);
+                  }
+                }}
+              />
+            </div>
           </div>
         </section>
 
-        {book.tags && book.tags.length > 0 && (
-          <div className={styles.tags}>
-            {book.tags.map((tag) => (
-              <span key={tag} className={styles.tag}>
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
         {book.summary || book.bookDescription ? (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Summary</h2>
-            <div className={styles.sectionBody}>
-              <div className={styles.summaryContent} style={{ whiteSpace: 'pre-line' }}>
-                {book.summary ? (
-                  book.summary.split('\n').map((paragraph, index) => (
-                    paragraph.trim() && (
-                      <p key={index}>{paragraph.trim()}</p>
-                    )
-                  ))
-                ) : book.bookDescription ? (
-                  book.bookDescription.split('\n').map((paragraph, index) => (
-                    paragraph.trim() && (
-                      <p key={index}>{paragraph.trim()}</p>
-                    )
-                  ))
-                ) : null}
+            <h2 className={styles.sectionTitle}>What&apos;s it about?</h2>
+            {book.tags && book.tags.length > 0 && (
+              <div className={styles.tags}>
+                {book.tags.map((tag) => (
+                  <span key={tag} className={styles.tag}>
+                    {tag}
+                  </span>
+                ))}
               </div>
+            )}
+            <div className={styles.sectionBody}>
+              <p className={styles.descriptionText}>
+                {excerpt || book.bookDescription || book.summary || "No description available."}
+              </p>
             </div>
           </section>
         ) : null}
