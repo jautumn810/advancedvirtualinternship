@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setAuthModalOpen, setError, setLoading } from "@/store/slices/authSlice";
-import { auth, googleProvider } from "@/lib/firebase";
+import { getAuthInstance, getGoogleProvider } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -17,109 +17,247 @@ import styles from "./AuthModal.module.css";
 
 export default function AuthModal() {
   const dispatch = useDispatch();
-  const { isAuthModalOpen, isLoading, user } = useSelector((s: RootState) => s.auth);
+  const { isAuthModalOpen, isLoading, user, error } = useSelector((s: RootState) => s.auth);
   const [tab, setTab] = useState<"login" | "register" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [resetSent, setResetSent] = useState(false);
 
-  const close = () => dispatch(setAuthModalOpen(false));
+  useEffect(() => {
+    if (isAuthModalOpen) {
+      dispatch(setError(null));
+    }
+  }, [isAuthModalOpen, dispatch]);
 
-  const onLogin = async () => {
+  const close = () => {
+    console.log("Closing modal");
+    dispatch(setAuthModalOpen(false));
+  };
+
+  const getAuth = () => {
+    let auth = getAuthInstance();
+    if (!auth) {
+      // Force retry multiple times
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          auth = getAuthInstance();
+        }, i * 100);
+      }
+      auth = getAuthInstance();
+    }
+    return auth;
+  };
+
+  const onLogin = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    console.log("Login clicked", { email, password });
+    
+    const authInstance = getAuth();
+    if (!authInstance) {
+      console.error("No auth instance");
+      return;
+    }
+
     dispatch(setLoading(true));
     dispatch(setError(null));
+    
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      console.log("Attempting login...");
+      await signInWithEmailAndPassword(authInstance, email, password);
+      console.log("Login successful");
       close();
     } catch (e: any) {
-      dispatch(setError(e?.message ?? "Login failed. Please try again."));
+      console.error("Login error:", e);
+      dispatch(setError(e?.message || "Login failed"));
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  const onRegister = async () => {
+  const onRegister = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    console.log("Register clicked", { email, password });
+    
+    const authInstance = getAuth();
+    if (!authInstance) {
+      console.error("No auth instance");
+      return;
+    }
+
     dispatch(setLoading(true));
     dispatch(setError(null));
+    
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Attempting registration...");
+      await createUserWithEmailAndPassword(authInstance, email, password);
+      console.log("Registration successful");
       close();
     } catch (e: any) {
-      dispatch(setError(e?.message ?? "Registration failed. Please try again."));
+      console.error("Registration error:", e);
+      dispatch(setError(e?.message || "Registration failed"));
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  const onGuest = async () => {
+  const onGuest = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Guest login clicked");
+    
+    const authInstance = getAuth();
+    if (!authInstance) {
+      console.error("No auth instance");
+      return;
+    }
+
     dispatch(setLoading(true));
     dispatch(setError(null));
+    
     try {
-      await signInWithEmailAndPassword(auth, "guest@gmail.com", "guest123");
+      console.log("Attempting guest login...");
+      await signInWithEmailAndPassword(authInstance, "guest@gmail.com", "guest123");
+      console.log("Guest login successful");
       close();
     } catch (e: any) {
-      dispatch(setError(e?.message ?? "Guest login failed. Please try again."));
+      console.error("Guest login error:", e);
+      dispatch(setError(e?.message || "Guest login failed"));
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  const onGoogleSignIn = async () => {
+  const onGoogleSignIn = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Google sign in clicked");
+    
+    const authInstance = getAuth();
+    if (!authInstance) {
+      console.error("No auth instance");
+      return;
+    }
+
+    const googleProvider = getGoogleProvider();
     dispatch(setLoading(true));
     dispatch(setError(null));
+    
     try {
-      await signInWithPopup(auth, googleProvider);
+      console.log("Attempting Google sign in...");
+      await signInWithPopup(authInstance, googleProvider);
+      console.log("Google sign in successful");
       close();
     } catch (e: any) {
-      // Don't show error if user closed the popup (expected behavior)
-      if (e?.code !== "auth/popup-closed-by-user") {
-        dispatch(setError(e?.message ?? "Google sign-in failed. Please try again."));
+      console.error("Google sign in error:", e);
+      if (e?.code !== "auth/popup-closed-by-user" && e?.code !== "auth/cancelled-popup-request") {
+        dispatch(setError(e?.message || "Google sign in failed"));
       }
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  const onLogout = async () => {
+  const onLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Logout clicked");
+    
+    const authInstance = getAuth();
+    if (!authInstance) return;
+
     dispatch(setLoading(true));
-    dispatch(setError(null));
     try {
-      await signOut(auth);
+      await signOut(authInstance);
+      close();
     } catch (e: any) {
-      dispatch(setError(e?.message ?? "Logout failed. Please try again."));
+      console.error("Logout error:", e);
     } finally {
       dispatch(setLoading(false));
     }
   };
 
-  const onResetPassword = async () => {
-    if (!email) {
-      return;
-    }
+  const onResetPassword = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    console.log("Reset password clicked", { email });
+    
+    if (!email) return;
+
+    const authInstance = getAuth();
+    if (!authInstance) return;
+
     dispatch(setLoading(true));
     dispatch(setError(null));
+    
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(authInstance, email);
       setResetSent(true);
     } catch (e: any) {
-      dispatch(setError(e?.message ?? "Failed to send reset email. Please try again."));
-      // Error handled silently
+      console.error("Reset password error:", e);
+      dispatch(setError(e?.message || "Failed to send reset email"));
     } finally {
       dispatch(setLoading(false));
     }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Form submitted", { tab, email, password });
+    
+    if (tab === "login") {
+      onLogin();
+    } else if (tab === "register") {
+      onRegister();
+    }
+  };
+
+  const handleTabSwitch = (newTab: "login" | "register") => {
+    console.log("Switching tab to:", newTab);
+    setTab(newTab);
+    dispatch(setError(null));
+  };
+
+  const handleResetTab = () => {
+    console.log("Switching to reset tab");
+    setTab("reset");
   };
 
   if (!isAuthModalOpen) return null;
 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      close();
+    }
+  };
+
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
+    <div className={styles.overlay} onClick={handleOverlayClick}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Log in to Summarist</h2>
-          <button onClick={close} className={styles.close} type="button" aria-label="Close">
+          <h2 className={styles.title}>
+            {tab === "register" ? "Create an account" : tab === "reset" ? "Reset password" : "Log in to Summarist"}
+          </h2>
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              close();
+            }} 
+            className={styles.close} 
+            type="button" 
+            aria-label="Close"
+          >
             ×
           </button>
         </div>
+
+        {error && (
+          <div className={styles.error}>
+            {error}
+          </div>
+        )}
 
         {!user ? (
           <>
@@ -128,7 +266,9 @@ export default function AuthModal() {
                 <p>Password reset email sent!</p>
                 <p>Check your email ({email}) for instructions to reset your password.</p>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     setTab("login");
                     setResetSent(false);
                   }}
@@ -139,13 +279,7 @@ export default function AuthModal() {
                 </button>
               </div>
             ) : tab === "reset" ? (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  onResetPassword();
-                }}
-                className={styles.form}
-              >
+              <form onSubmit={onResetPassword} className={styles.form}>
                 <div className={styles.fieldGroup}>
                   <label className={styles.label}>Email Address</label>
                   <input
@@ -159,15 +293,19 @@ export default function AuthModal() {
                 </div>
                 <button
                   type="submit"
-                  disabled={isLoading}
                   className={styles.loginButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 >
-                  {isLoading ? "Sending..." : "Send Reset Email"}
+                  Send Reset Email
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setTab("login");
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleTabSwitch("login");
                   }}
                   className={styles.linkButton}
                 >
@@ -175,18 +313,11 @@ export default function AuthModal() {
                 </button>
               </form>
             ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  tab === "login" ? onLogin() : onRegister();
-                }}
-                className={styles.form}
-              >
+              <form onSubmit={handleFormSubmit} className={styles.form}>
                 <button
                   type="button"
                   onClick={onGuest}
                   className={styles.guestButton}
-                  disabled={isLoading}
                 >
                   <span className={styles.iconLabel}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -204,7 +335,6 @@ export default function AuthModal() {
                   type="button"
                   onClick={onGoogleSignIn}
                   className={styles.googleButton}
-                  disabled={isLoading}
                 >
                   <span className={styles.iconLabel}>
                     <Image src="/google.png" alt="Google" width={20} height={20} className={styles.googleIcon} />
@@ -235,33 +365,42 @@ export default function AuthModal() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={6}
                     placeholder="Enter your password"
                   />
                 </div>
                 <button
                   type="submit"
-                  disabled={isLoading}
                   className={styles.loginButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 >
-                  {isLoading ? "Please wait..." : "Login"}
+                  {tab === "register" ? "Create Account" : "Login"}
                 </button>
                 <div className={styles.linkGroup}>
+                  {tab === "login" && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleResetTab();
+                      }}
+                      className={styles.linkButton}
+                    >
+                      Forgot your password?
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => setTab("reset")}
-                    className={styles.linkButton}
-                  >
-                    Forgot your password?
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTab("register");
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleTabSwitch(tab === "login" ? "register" : "login");
                     }}
                     className={styles.linkButton}
                   >
-                    Don&apos;t have an account?
+                    {tab === "login" ? "Don't have an account?" : "Already have an account?"}
                   </button>
                 </div>
               </form>

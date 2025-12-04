@@ -18,7 +18,8 @@ export function useAuthListener(): void {
   useEffect(() => {
     const authInstance = getAuthInstance();
     if (!authInstance) {
-      console.warn('Firebase Auth is not initialized. Authentication features will be unavailable.');
+      // Silently handle missing Firebase - don't log warnings that break the app
+      // Authentication features will simply be unavailable
       return;
     }
     

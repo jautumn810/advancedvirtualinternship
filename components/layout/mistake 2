@@ -1,0 +1,177 @@
+rompt for Cursor
+
+You are an expert front-end engineer and router debugger.
+I have a book app where each book should have its own detail page with summary and author info, but right now when I click on any book it sends me back to the home page instead of the correct book page.
+
+Goal
+
+Fix the routing so that:
+
+Clicking a book in the list navigates to that book’s own detail page.
+
+The detail page correctly shows the chosen book’s title, summary/description, and author info.
+
+The app no longer sends me back to the home page when I click a book.
+
+Important constraints
+
+Detect automatically whether this project is using:
+
+Next.js (App Router: app/), or
+
+Next.js (Pages Router: pages/), or
+
+React Router (e.g. react-router-dom), or
+
+Another routing system.
+
+Fix ONLY what is necessary for correct dynamic routing and data loading.
+Do not change the design, styling, or unrelated logic.
+
+Keep component names and existing file structure the same.
+
+Step 1 – Inspect the code
+
+Find the main book listing component (for example something like BooksList, BookList, BookGrid, or similar) where all books from the API are rendered as clickable cards or items.
+
+Look in typical places, such as:
+
+src/app/*
+
+src/pages/*
+
+src/components/*
+
+Find where the routes are defined:
+
+For Next.js App Router: dynamic route folders like app/books/[id]/page.(js|jsx|tsx).
+
+For Next.js Pages Router: dynamic route files like pages/books/[id].(js|jsx|tsx).
+
+For React Router: src/App.(js|tsx) or src/router/*, where <Routes> and <Route> components are defined.
+
+Identify:
+
+What parameter is used in the dynamic route (e.g. id, bookId, slug).
+
+How the API identifies a book (e.g. book.id, book._id, book.slug, or book.title).
+
+Do NOT make changes yet. First understand and align the parameter names and paths.
+
+Step 2 – Fix the Link / navigation in the book list
+
+Update the click / link logic in the book list component so that:
+
+Each book’s clickable element uses the correct path that matches the dynamic route.
+
+It must NOT use / (home) as the href or navigation target.
+
+Examples (adjust to the actual stack you detected):
+
+If using Next.js App Router with a dynamic route app/books/[id]/page.tsx:
+
+In the list component, for each book, use something like:
+
+import Link from "next/link";
+
+<Link href={`/books/${book.id}`}>
+  {/* existing card content */}
+</Link>
+
+
+Ensure that book.id matches whatever parameter the [id] segment expects.
+
+If using Next.js Pages Router with pages/books/[id].tsx:
+
+Same as above, but confirm the file path.
+
+If using React Router:
+
+Ensure there is a <Route path="/books/:id" element={<BookDetail />} /> (or similar) defined.
+
+In the list component:
+
+import { Link } from "react-router-dom";
+
+<Link to={`/books/${book.id}`}>
+  {/* existing card content */}
+</Link>
+
+
+When you edit, only change the navigation / route path and keep all other styling and content intact.
+
+Step 3 – Fix the dynamic route page / detail page
+
+On the book detail page (dynamic route), do the following:
+
+Read the route parameter using the correct API for the router you detected:
+
+Next.js App Router:
+
+import { notFound } from "next/navigation";
+
+export default async function BookPage({ params }) {
+  const { id } = params; // or params.slug, etc.
+  // fetch book using id
+}
+
+
+Next.js Pages Router:
+
+import { useRouter } from "next/router";
+
+const BookPage = () => {
+  const router = useRouter();
+  const { id } = router.query;
+  // fetch book using id
+};
+
+
+React Router:
+
+import { useParams } from "react-router-dom";
+
+const BookPage = () => {
+  const { id } = useParams();
+  // fetch book using id
+};
+
+
+Use that parameter to fetch the correct book from the API or from a shared state/cache:
+
+If there is already logic to fetch books, reuse it.
+
+Make sure the field in the URL (e.g. id or slug) matches the field used in the API.
+
+Remove or adjust any code that redirects to the home page if book data is temporarily undefined:
+
+Instead of immediately redirecting, handle loading and error states properly, e.g.:
+
+if (isLoading) return <div>Loading...</div>;
+if (!book) return <div>Book not found</div>;
+
+
+Render the book’s:
+
+Title
+
+Summary/description
+
+Author name and any other author information available in the API
+
+Step 4 – Verify and clean up
+
+Run the app and verify:
+
+Home page loads normally.
+
+Clicking on each book now navigates to /books/<book-id-or-slug> instead of /.
+
+The correct book data shows on its page.
+
+The browser back button returns from the detail page to the list page.
+
+Remove any leftover unused imports or variables you introduced.
+
+Finally, show me the diff of all changed files so I can review.
+Do not change any styling, layout, or unrelated logic—only fix routing and data loading so each book opens on its own page.

@@ -7,7 +7,9 @@
   padding: 24px;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 50;
+  z-index: 9999;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .modal {
@@ -21,6 +23,11 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  position: relative;
+  z-index: 10000;
+  pointer-events: auto;
+  touch-action: manipulation;
+  isolation: isolate;
 }
 
 .header {
@@ -51,6 +58,9 @@
   justify-content: center;
   line-height: 1;
   transition: color 0.2s ease;
+  pointer-events: auto;
+  z-index: 52;
+  position: relative;
 }
 
 .close:hover {
@@ -118,6 +128,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .guestButton:hover:not(:disabled) {
@@ -127,6 +140,10 @@
 .guestButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.guestButton:active {
+  transform: scale(0.98);
 }
 
 .googleButton {
@@ -143,6 +160,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .googleButton:hover:not(:disabled) {
@@ -152,6 +172,10 @@
 .googleButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.googleButton:active {
+  transform: scale(0.98);
 }
 
 .loginButton {
@@ -165,6 +189,9 @@
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .loginButton:hover:not(:disabled) {
@@ -174,6 +201,22 @@
 .loginButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.loginButton:active {
+  transform: scale(0.98);
+}
+
+.loginButton,
+.guestButton,
+.googleButton,
+.linkButton,
+.close,
+.backButton,
+.logoutButton {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .divider {
@@ -212,6 +255,9 @@
   padding: 0;
   text-align: left;
   transition: color 0.2s ease;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
 }
 
 .linkButton:hover {

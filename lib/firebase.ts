@@ -20,7 +20,15 @@ let googleProviderInstance: InstanceType<typeof GoogleAuthProvider> | null = nul
 function getApp(): FirebaseApp | null {
   // Check if Firebase config is available first
   if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.warn('Firebase configuration is missing. Please set NEXT_PUBLIC_FIREBASE_* environment variables.');
+    // Log in development to help debug
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Firebase configuration is missing. Please set NEXT_PUBLIC_FIREBASE_* environment variables.');
+      console.log('Current config:', {
+        hasApiKey: !!firebaseConfig.apiKey,
+        hasProjectId: !!firebaseConfig.projectId,
+        hasAuthDomain: !!firebaseConfig.authDomain,
+      });
+    }
     return null;
   }
 
@@ -28,8 +36,14 @@ function getApp(): FirebaseApp | null {
     if (!getApps().length) {
       try {
         app = initializeApp(firebaseConfig);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Firebase initialized successfully');
+        }
       } catch (error) {
-        console.error('Failed to initialize Firebase:', error);
+        // Log errors in development
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to initialize Firebase:', error);
+        }
         return null;
       }
     } else {
@@ -80,8 +94,11 @@ export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
     if (!_auth) {
       _auth = getAuthInstance();
       if (!_auth) {
+        // Return a no-op function instead of logging warnings
         return () => {
-          console.warn('Firebase Auth is not initialized. Please configure Firebase environment variables.');
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Firebase Auth is not initialized. Please configure Firebase environment variables.');
+          }
         };
       }
     }
@@ -98,8 +115,11 @@ export const db = new Proxy({} as ReturnType<typeof getFirestore>, {
     if (!_db) {
       _db = getDbInstance();
       if (!_db) {
+        // Return a no-op function instead of logging warnings
         return () => {
-          console.warn('Firebase Firestore is not initialized. Please configure Firebase environment variables.');
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Firebase Firestore is not initialized. Please configure Firebase environment variables.');
+          }
         };
       }
     }

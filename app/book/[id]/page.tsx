@@ -62,7 +62,12 @@ export default function BookDetailPage() {
       }
 
       // Decode the ID in case it was URL-encoded
-      const decodedId = decodeURIComponent(bookId);
+      let decodedId: string;
+      try {
+        decodedId = decodeURIComponent(bookId);
+      } catch {
+        decodedId = bookId;
+      }
 
       setLoading(true);
       setError(null);
@@ -70,17 +75,52 @@ export default function BookDetailPage() {
       setCoverSrc(FALLBACK_IMAGE);
 
       try {
+        // Use the API endpoint from the virtual internship file
         const bookData = await getBookById(decodedId);
-        setBook(bookData);
+        
+        if (!bookData) {
+          throw new Error("No book data received from API");
+        }
+        
+        // Validate required fields
+        if (!bookData.id && !bookData.title) {
+          throw new Error("Invalid book data: missing required fields");
+        }
+        
+        // Ensure all required fields have defaults
+        const normalizedBook: Book = {
+          id: bookData.id || decodedId,
+          title: bookData.title || "Untitled Book",
+          author: bookData.author || "Unknown Author",
+          subTitle: bookData.subTitle || "",
+          imageLink: bookData.imageLink || FALLBACK_IMAGE,
+          audioLink: bookData.audioLink || "",
+          audioLength: bookData.audioLength || 0,
+          totalRating: bookData.totalRating || 0,
+          averageRating: bookData.averageRating || 0,
+          keyIdeas: bookData.keyIdeas || [],
+          type: bookData.type || "text",
+          status: bookData.status || "suggested",
+          subscriptionRequired: bookData.subscriptionRequired || false,
+          summary: bookData.summary || bookData.bookDescription || "",
+          tags: bookData.tags || [],
+          bookDescription: bookData.bookDescription || bookData.summary || "",
+          authorDescription: bookData.authorDescription || "",
+        };
+        
+        setBook(normalizedBook);
         setError(null);
       } catch (err: any) {
-        setError(err.message || "Failed to load book");
+        const errorMessage = err.message || "Failed to load book. Please check your connection and try again.";
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBook();
+    if (params.id) {
+      fetchBook();
+    }
   }, [params.id]);
 
   useEffect(() => {
@@ -181,7 +221,7 @@ export default function BookDetailPage() {
     );
   }
 
-  if (error || !book) {
+  if (error || (!book && !loading)) {
     return (
       <div className={styles.page}>
         <Sidebar />
@@ -190,7 +230,35 @@ export default function BookDetailPage() {
             <SearchBar />
           </div>
           <div className={styles.errorWrapper}>
-            <ErrorMessage message={error || "Book not found"} onRetry={handleRetry} />
+            <ErrorMessage 
+              message={error || "Book not found. Please check the book ID and try again."} 
+              onRetry={handleRetry} 
+            />
+            {params.id && (
+              <div style={{ marginTop: '16px', fontSize: '14px', color: '#63748a' }}>
+                Book ID: {Array.isArray(params.id) ? params.id[0] : params.id}
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Safety check - ensure book exists before rendering
+  if (!book) {
+    return (
+      <div className={styles.page}>
+        <Sidebar />
+        <main className={styles.content}>
+          <div className={styles.toolbar}>
+            <SearchBar />
+          </div>
+          <div className={styles.errorWrapper}>
+            <ErrorMessage 
+              message="Book data is missing. Please try again." 
+              onRetry={handleRetry} 
+            />
           </div>
         </main>
       </div>
@@ -217,8 +285,8 @@ export default function BookDetailPage() {
 
         <section className={styles.hero}>
           <div className={styles.headingGroup}>
-            <h1 className={styles.title}>{book.title}</h1>
-            <p className={styles.author}>{book.author}</p>
+            <h1 className={styles.title}>{book.title || "Untitled Book"}</h1>
+            <p className={styles.author}>{book.author || "Unknown Author"}</p>
             {book.subTitle && <p className={styles.subtitle}>{book.subTitle}</p>}
 
             <div className={styles.metrics}>
@@ -270,6 +338,9 @@ export default function BookDetailPage() {
           </div>
 
           <div className={styles.coverWrap}>
+            {book.subscriptionRequired && (
+              <span className={styles.premiumBadge}>Premium</span>
+            )}
             <Image
               src={coverSrc}
               alt={book.title}
@@ -294,30 +365,53 @@ export default function BookDetailPage() {
           </div>
         )}
 
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Summary</h2>
-          <div className={styles.sectionBody}>
-            {book.summary ? (
-              <div className={styles.summaryContent}>
-                {book.summary.split('\n').map((paragraph, index) => (
-                  paragraph.trim() && (
-                    <p key={index}>{paragraph.trim()}</p>
-                  )
-                ))}
+        {book.summary || book.bookDescription ? (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Summary</h2>
+            <div className={styles.sectionBody}>
+              <div className={styles.summaryContent} style={{ whiteSpace: 'pre-line' }}>
+                {book.summary ? (
+                  book.summary.split('\n').map((paragraph, index) => (
+                    paragraph.trim() && (
+                      <p key={index}>{paragraph.trim()}</p>
+                    )
+                  ))
+                ) : book.bookDescription ? (
+                  book.bookDescription.split('\n').map((paragraph, index) => (
+                    paragraph.trim() && (
+                      <p key={index}>{paragraph.trim()}</p>
+                    )
+                  ))
+                ) : null}
               </div>
-            ) : book.bookDescription ? (
-              <div className={styles.summaryContent}>
-                {book.bookDescription.split('\n').map((paragraph, index) => (
-                  paragraph.trim() && (
-                    <p key={index}>{paragraph.trim()}</p>
-                  )
-                ))}
-              </div>
-            ) : (
-              <p>No summary available for this book.</p>
-            )}
-          </div>
-        </section>
+            </div>
+          </section>
+        ) : null}
+
+        {book.keyIdeas && Array.isArray(book.keyIdeas) && book.keyIdeas.length > 0 && (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Key Ideas</h2>
+            <div className={styles.sectionBody}>
+              <ul className={styles.keyIdeasList}>
+                {book.keyIdeas.map((idea, index) => {
+                  if (typeof idea === 'string') {
+                    return (
+                      <li key={index} className={styles.keyIdeaItem}>
+                        {idea}
+                      </li>
+                    );
+                  } else {
+                    return (
+                      <li key={index} className={styles.keyIdeaItem}>
+                        <strong>{idea.title}:</strong> {idea.description}
+                      </li>
+                    );
+                  }
+                })}
+              </ul>
+            </div>
+          </section>
+        )}
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>About the Author</h2>

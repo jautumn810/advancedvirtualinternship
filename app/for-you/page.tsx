@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, createContext, useContext, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -184,6 +185,7 @@ function BookTile({ book, duration, isBookmarked, onBookmarkToggle }: { book: Bo
   const [imageSrc, setImageSrc] = useState(book.imageLink || FALLBACK_IMAGE);
   const { playingId, playSample, stopSample } = useAudioSample();
   const isPlaying = playingId === book.id;
+  const router = useRouter();
 
   // Generate a color index based on book ID for consistent semi-circle colors
   const colorIndex = useMemo(() => {
@@ -208,6 +210,21 @@ function BookTile({ book, duration, isBookmarked, onBookmarkToggle }: { book: Bo
     onBookmarkToggle();
   };
 
+  const handleTileClick = (e: React.MouseEvent) => {
+    // Only navigate if the click is not on a button (buttons stop propagation)
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) {
+      e.preventDefault();
+      return; // Let the button handle the click
+    }
+    // Use router.push to ensure navigation works
+    e.preventDefault();
+    // Next.js handles URL encoding automatically, but we'll encode to be safe
+    const bookPath = `/book/${encodeURIComponent(book.id)}`;
+    console.log("Navigating to book page:", bookPath, "Book ID:", book.id);
+    router.push(bookPath);
+  };
+
   if (!book.id) {
     return null; // Don't render if book ID is missing
   }
@@ -217,6 +234,7 @@ function BookTile({ book, duration, isBookmarked, onBookmarkToggle }: { book: Bo
       href={`/book/${encodeURIComponent(book.id)}`} 
       className={styles.bookTile}
       style={{ '--semi-circle-color': colorIndex } as React.CSSProperties}
+      onClick={handleTileClick}
     >
       <div className={styles.semiCircle}></div>
       {book.subscriptionRequired && <span className={styles.badge}>Premium</span>}
@@ -263,6 +281,7 @@ function SuggestedBookTile({ book, duration, isBookmarked, onBookmarkToggle }: {
   const [imageSrc, setImageSrc] = useState(book.imageLink || FALLBACK_IMAGE);
   const { playingId, playSample, stopSample } = useAudioSample();
   const isPlaying = playingId === book.id;
+  const router = useRouter();
 
   // Generate a color index based on book ID for consistent semi-circle colors
   const colorIndex = useMemo(() => {
@@ -287,6 +306,21 @@ function SuggestedBookTile({ book, duration, isBookmarked, onBookmarkToggle }: {
     onBookmarkToggle();
   };
 
+  const handleTileClick = (e: React.MouseEvent) => {
+    // Only navigate if the click is not on a button (buttons stop propagation)
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) {
+      e.preventDefault();
+      return; // Let the button handle the click
+    }
+    // Use router.push to ensure navigation works
+    e.preventDefault();
+    // Next.js handles URL encoding automatically, but we'll encode to be safe
+    const bookPath = `/book/${encodeURIComponent(book.id)}`;
+    console.log("Navigating to book page:", bookPath, "Book ID:", book.id);
+    router.push(bookPath);
+  };
+
   if (!book.id) {
     return null; // Don't render if book ID is missing
   }
@@ -296,6 +330,7 @@ function SuggestedBookTile({ book, duration, isBookmarked, onBookmarkToggle }: {
       href={`/book/${encodeURIComponent(book.id)}`} 
       className={styles.bookTile}
       style={{ '--semi-circle-color': colorIndex } as React.CSSProperties}
+      onClick={handleTileClick}
     >
       <div className={styles.semiCircle}></div>
       {book.subscriptionRequired && <span className={styles.badge}>Premium</span>}
@@ -354,6 +389,7 @@ function SuggestedBookTile({ book, duration, isBookmarked, onBookmarkToggle }: {
 
 export default function ForYouPage() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { selectedBook, recommendedBooks, suggestedBooks, searchResults, isLoading, error } = useSelector(
     (state: RootState) => state.books
   );
@@ -433,8 +469,15 @@ export default function ForYouPage() {
     const fetchBookmarks = async () => {
       try {
         // Import Firestore functions to query directly and preserve book id
-        const { db } = await import("@/lib/firebase");
+        const { getDbInstance } = await import("@/lib/firebase");
         const { collection, query, where, getDocs } = await import("firebase/firestore");
+        
+        const db = getDbInstance();
+        if (!db) {
+          // Firebase not initialized - just return empty set
+          setBookmarkedIds(new Set());
+          return;
+        }
         
         const q = query(
           collection(db, "library"),
@@ -455,7 +498,11 @@ export default function ForYouPage() {
         
         setBookmarkedIds(bookmarkedSet);
       } catch (error) {
-        console.error("Error fetching bookmarks:", error);
+        // Silently handle errors - don't log in production
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Error fetching bookmarks:", error);
+        }
+        setBookmarkedIds(new Set());
       }
     };
 
@@ -615,7 +662,22 @@ export default function ForYouPage() {
               ))}
             </div>
           ) : selectedBook ? (
-            <Link href={`/book/${encodeURIComponent(selectedBook.id)}`} className={styles.selectedCard}>
+            <Link 
+              href={`/book/${encodeURIComponent(selectedBook.id)}`} 
+              className={styles.selectedCard}
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                if (target.closest('button')) {
+                  e.preventDefault();
+                  return; // Let the button handle the click
+                }
+                // Use router.push to ensure navigation works
+                e.preventDefault();
+                const bookPath = `/book/${encodeURIComponent(selectedBook.id)}`;
+                console.log("Navigating to selected book page:", bookPath, "Book ID:", selectedBook.id);
+                router.push(bookPath);
+              }}
+            >
               <p className={styles.selectedSummary}>
                 {selectedBook.subTitle || selectedBook.bookDescription?.split(". ")[0] || selectedDescription}
               </p>

@@ -31,15 +31,35 @@ export const getBooksByStatus = async (status: 'selected' | 'recommended' | 'sug
 
 export const getBookById = async (id: string): Promise<Book> => {
   return retryRequest(async () => {
-    const response = await fetch(`${BASE_URL}/getBook?id=${id}`);
+    // Ensure ID is properly encoded
+    const encodedId = encodeURIComponent(id);
+    const url = `${BASE_URL}/getBook?id=${encodedId}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
     if (!response.ok) {
       if (response.status === 404) {
-        throw new Error('Book not found');
+        throw new Error(`Book with ID "${id}" not found`);
+      }
+      if (response.status >= 500) {
+        throw new Error('Server error. Please try again later.');
       }
       throw new Error(`Failed to fetch book: ${response.statusText}`);
     }
+    
     const data = await response.json();
-    return data;
+    
+    // Validate response data
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid response from server');
+    }
+    
+    return data as Book;
   });
 };
 
