@@ -32,7 +32,7 @@ function BookTile({ book, duration }: { book: Book; duration?: number }) {
   const description = useMemo(() => getDescription(book), [book]);
 
   return (
-    <Link href={`/book/${book.id}`} className={styles.bookTile}>
+    <Link href={`/book/${encodeURIComponent(book.id)}`} className={styles.bookTile}>
       {book.subscriptionRequired && <span className={styles.badge}>Premium</span>}
       <div className={styles.cover}>
         <Image

@@ -13,7 +13,10 @@ import SearchBar from "@/components/layout/SearchBar";
 import { SkeletonCard, SkeletonText } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import { formatDuration } from "@/lib/audio";
-import { FiStar, FiClock, FiBookOpen } from "react-icons/fi";
+import { FiStar, FiClock, FiBookOpen, FiBookmark, FiShare2, FiCopy, FiTwitter, FiFacebook, FiLinkedin } from "react-icons/fi";
+import { addToLibrary, removeFromLibrary, getLibraryBooks } from "@/lib/library";
+import { getDbInstance } from "@/lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import styles from "./page.module.css";
 
 const FALLBACK_IMAGE = "https://via.placeholder.com/600x800?text=No+Image";
@@ -49,6 +52,10 @@ export default function BookDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [coverSrc, setCoverSrc] = useState<string>(FALLBACK_IMAGE);
   const [isAdding, setIsAdding] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isCheckingBookmark, setIsCheckingBookmark] = useState(true);
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -131,6 +138,56 @@ export default function BookDetailPage() {
     }
   }, [book?.imageLink]);
 
+  // Check if book is bookmarked
+  useEffect(() => {
+    const checkBookmark = async () => {
+      if (!user || !book?.id) {
+        setIsBookmarked(false);
+        setIsCheckingBookmark(false);
+        return;
+      }
+
+      try {
+        const db = getDbInstance();
+        if (!db) {
+          setIsBookmarked(false);
+          setIsCheckingBookmark(false);
+          return;
+        }
+
+        const q = query(
+          collection(db, "library"),
+          where("userId", "==", user.uid),
+          where("id", "==", book.id)
+        );
+        const querySnapshot = await getDocs(q);
+        setIsBookmarked(!querySnapshot.empty);
+      } catch (error) {
+        console.error("Error checking bookmark:", error);
+        setIsBookmarked(false);
+      } finally {
+        setIsCheckingBookmark(false);
+      }
+    };
+
+    checkBookmark();
+  }, [user, book?.id]);
+
+  // Close share menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (shareMenuOpen && !target.closest(`.${styles.shareContainer}`)) {
+        setShareMenuOpen(false);
+      }
+    };
+
+    if (shareMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [shareMenuOpen]);
+
   const handleReadListen = (action: "read" | "listen") => {
     if (!user) {
       dispatch(setAuthModalOpen(true));
@@ -153,7 +210,7 @@ export default function BookDetailPage() {
     router.push(`/player/${book.id}`);
   };
 
-  const handleAddToLibrary = async () => {
+  const handleToggleBookmark = async () => {
     if (!user) {
       dispatch(setAuthModalOpen(true));
       return;
@@ -163,14 +220,73 @@ export default function BookDetailPage() {
 
     try {
       setIsAdding(true);
-      const { addToLibrary } = await import("@/lib/library");
-      await addToLibrary(user.uid, book);
-      alert("Book added to library!");
+      
+      if (isBookmarked) {
+        await removeFromLibrary(user.uid, book.id);
+        setIsBookmarked(false);
+      } else {
+        await addToLibrary(user.uid, book);
+        setIsBookmarked(true);
+      }
     } catch (error) {
-      console.error("Error adding to library:", error);
-      alert("Failed to add book to library. Please try again.");
+      console.error("Error toggling bookmark:", error);
+      alert("Failed to update bookmark. Please try again.");
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  const handleShare = (platform?: string) => {
+    if (!book) return;
+
+    const bookUrl = typeof window !== 'undefined' 
+      ? `${window.location.origin}/book/${encodeURIComponent(book.id)}`
+      : '';
+    const shareText = `Check out "${book.title}" by ${book.author} on Summarist!`;
+
+    if (platform === 'copy') {
+      navigator.clipboard.writeText(bookUrl).then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+        setShareMenuOpen(false);
+      });
+      return;
+    }
+
+    let shareUrl = '';
+    switch (platform) {
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(bookUrl)}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(bookUrl)}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(bookUrl)}`;
+        break;
+      default:
+        // Native share API if available
+        if (navigator.share) {
+          navigator.share({
+            title: book.title,
+            text: shareText,
+            url: bookUrl,
+          }).catch(() => {});
+          setShareMenuOpen(false);
+          return;
+        }
+        // Fallback to copy
+        navigator.clipboard.writeText(bookUrl).then(() => {
+          setCopySuccess(true);
+          setTimeout(() => setCopySuccess(false), 2000);
+        });
+        setShareMenuOpen(false);
+        return;
+    }
+
+    if (shareUrl) {
+      window.open(shareUrl, '_blank', 'width=600,height=400');
+      setShareMenuOpen(false);
     }
   };
 
@@ -327,14 +443,65 @@ export default function BookDetailPage() {
                 Listen
               </button>
             </div>
-            <button
-              onClick={handleAddToLibrary}
-              className={styles.libraryLink}
-              type="button"
-              disabled={isAdding}
-            >
-              Add title to My Library
-            </button>
+            <div className={styles.actionRow}>
+              <button
+                onClick={handleToggleBookmark}
+                className={`${styles.actionButton} ${isBookmarked ? styles.bookmarked : ''}`}
+                type="button"
+                disabled={isAdding || isCheckingBookmark}
+                aria-label={isBookmarked ? "Remove from library" : "Add to library"}
+              >
+                <FiBookmark aria-hidden="true" />
+                {isBookmarked ? "Saved" : "Save to Library"}
+              </button>
+              <div className={styles.shareContainer}>
+                <button
+                  onClick={() => setShareMenuOpen(!shareMenuOpen)}
+                  className={styles.actionButton}
+                  type="button"
+                  aria-label="Share book"
+                >
+                  <FiShare2 aria-hidden="true" />
+                  Share
+                </button>
+                {shareMenuOpen && (
+                  <div className={styles.shareMenu}>
+                    <button
+                      onClick={() => handleShare('twitter')}
+                      className={styles.shareOption}
+                      type="button"
+                    >
+                      <FiTwitter aria-hidden="true" />
+                      Twitter
+                    </button>
+                    <button
+                      onClick={() => handleShare('facebook')}
+                      className={styles.shareOption}
+                      type="button"
+                    >
+                      <FiFacebook aria-hidden="true" />
+                      Facebook
+                    </button>
+                    <button
+                      onClick={() => handleShare('linkedin')}
+                      className={styles.shareOption}
+                      type="button"
+                    >
+                      <FiLinkedin aria-hidden="true" />
+                      LinkedIn
+                    </button>
+                    <button
+                      onClick={() => handleShare('copy')}
+                      className={styles.shareOption}
+                      type="button"
+                    >
+                      <FiCopy aria-hidden="true" />
+                      {copySuccess ? "Copied!" : "Copy Link"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className={styles.coverWrap}>

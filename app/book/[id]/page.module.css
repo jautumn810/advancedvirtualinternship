@@ -111,19 +111,103 @@
   box-shadow: 0 10px 24px rgba(3, 44, 65, 0.12);
 }
 
-.libraryLink {
+.actionRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.actionButton {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 12px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid #dce4ef;
+  background: #ffffff;
+  color: #032b41;
   font-size: 15px;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: #f6f8fb;
+  border-color: #0365f2;
   color: #0365f2;
 }
 
-.libraryLink:disabled {
+.actionButton:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
+}
+
+.actionButton.bookmarked {
+  background: #e8f5e9;
+  border-color: #0f9f59;
+  color: #0f9f59;
+}
+
+.actionButton.bookmarked:hover:not(:disabled) {
+  background: #d4edda;
+}
+
+.shareContainer {
+  position: relative;
+}
+
+.shareMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #dce4ef;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  z-index: 1000;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shareOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: #032b41;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.shareOption:hover {
+  background: #f6f8fb;
+}
+
+.shareOption svg {
+  font-size: 18px;
 }
 
 .coverWrap {
