@@ -52,7 +52,17 @@ export default function BookDetailPage() {
 
   useEffect(() => {
     const fetchBook = async () => {
-      if (!params.id || typeof params.id !== "string") return;
+      // Handle params.id which can be string or string[] in Next.js
+      const bookId = Array.isArray(params.id) ? params.id[0] : params.id;
+      
+      if (!bookId || typeof bookId !== "string") {
+        setError("Invalid book ID");
+        setLoading(false);
+        return;
+      }
+
+      // Decode the ID in case it was URL-encoded
+      const decodedId = decodeURIComponent(bookId);
 
       setLoading(true);
       setError(null);
@@ -60,7 +70,7 @@ export default function BookDetailPage() {
       setCoverSrc(FALLBACK_IMAGE);
 
       try {
-        const bookData = await getBookById(params.id);
+        const bookData = await getBookById(decodedId);
         setBook(bookData);
         setError(null);
       } catch (err: any) {
@@ -125,12 +135,17 @@ export default function BookDetailPage() {
   };
 
   const handleRetry = () => {
-    if (!params.id || typeof params.id !== "string") return;
+    const bookId = Array.isArray(params.id) ? params.id[0] : params.id;
+    if (!bookId || typeof bookId !== "string") {
+      setError("Invalid book ID");
+      return;
+    }
+    const decodedId = decodeURIComponent(bookId);
     setError(null);
     setLoading(true);
     setBook(null);
     setCoverSrc(FALLBACK_IMAGE);
-    getBookById(params.id)
+    getBookById(decodedId)
       .then((bookData) => {
         setBook(bookData);
         setError(null);

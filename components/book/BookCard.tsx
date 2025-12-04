@@ -22,7 +22,7 @@ export default function BookCard({ book, duration }: BookCardProps) {
   }, [book.imageLink]);
 
   return (
-    <Link href={`/book/${book.id}`} className={styles.card}>
+    <Link href={`/book/${encodeURIComponent(book.id)}`} className={styles.card}>
       {book.subscriptionRequired && <div className={styles.badge}>Premium</div>}
       <div className={styles.imageWrap}>
         <Image

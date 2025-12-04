@@ -615,7 +615,7 @@ export default function ForYouPage() {
               ))}
             </div>
           ) : selectedBook ? (
-            <Link href={`/book/${selectedBook.id}`} className={styles.selectedCard}>
+            <Link href={`/book/${encodeURIComponent(selectedBook.id)}`} className={styles.selectedCard}>
               <p className={styles.selectedSummary}>
                 {selectedBook.subTitle || selectedBook.bookDescription?.split(". ")[0] || selectedDescription}
               </p>
