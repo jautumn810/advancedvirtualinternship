@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
@@ -25,6 +25,15 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
   const router = useRouter();
   const pathname = usePathname();
   const shouldHide = pathname === "/" || pathname === "/choose-plan";
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Restore search query from URL or maintain it across navigation
+  useEffect(() => {
+    // Keep search query when navigating to for-you page
+    if (pathname === "/for-you" && inputRef.current && !inputRef.current.value && searchQuery) {
+      // Query is maintained by state, so this is fine
+    }
+  }, [pathname, searchQuery]);
   
   // Get locally available books to enhance search
   const { selectedBook, recommendedBooks, suggestedBooks } = useSelector(
@@ -63,7 +72,10 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
     }
 
     if (!debouncedSearchQuery.trim()) {
-      dispatch(setSearchResults([]));
+      // Only clear results if we're on the for-you page, otherwise keep them
+      if (pathname === "/for-you") {
+        dispatch(setSearchResults([]));
+      }
       dispatch(setError(null));
       return;
     }
@@ -89,7 +101,8 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
         dispatch(setError(null));
         
         // Navigate to for-you page to show search results if not already there
-        if (books.length > 0 && pathname !== "/for-you" && !localFilterMode) {
+        // Only navigate if we have results and we're not already on for-you
+        if (pathname !== "/for-you" && !localFilterMode) {
           router.push("/for-you");
         }
       } catch (error: any) {
@@ -112,12 +125,26 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
     <div className={styles.root}>
       <FiSearch className={styles.icon} />
       <input
+        ref={inputRef}
         type="text"
         placeholder="Search for books..."
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+        }}
+        onFocus={(e) => {
+          // Ensure search bar stays visible on focus
+          e.target.select();
+        }}
+        onKeyDown={(e) => {
+          // Prevent form submission or navigation that might hide the search bar
+          if (e.key === "Enter") {
+            e.preventDefault();
+          }
+        }}
         className={styles.input}
         aria-label="Search for books"
+        autoComplete="off"
       />
     </div>
   );

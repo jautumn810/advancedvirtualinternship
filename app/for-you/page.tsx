@@ -37,11 +37,10 @@ const AudioSampleContext = createContext<AudioSampleContextType | null>(null);
 
 function AudioSampleProvider({ children }: { children: React.ReactNode }) {
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [voicesLoaded, setVoicesLoaded] = useState(false);
 
-  // Load voices when component mounts
+  // Load voices when component mounts (fallback for books without audioLink)
   useEffect(() => {
     const loadVoices = () => {
       if ('speechSynthesis' in window) {
@@ -52,7 +51,6 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Some browsers load voices asynchronously
     if ('speechSynthesis' in window) {
       loadVoices();
       window.speechSynthesis.onvoiceschanged = loadVoices;
@@ -66,16 +64,18 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const stopSample = useCallback(() => {
+    // Stop HTML5 audio if playing
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    
+    // Stop speech synthesis if playing
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
-    if (speechSynthesisRef.current) {
-      speechSynthesisRef.current = null;
-    }
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
+    
     setPlayingId(null);
   }, []);
 
@@ -83,70 +83,97 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
     // Stop any currently playing audio
     stopSample();
 
-    // Check if browser supports speech synthesis
-    if (!('speechSynthesis' in window)) {
-      console.error("Speech synthesis not supported");
-      alert("Your browser doesn't support text-to-speech. Please use a modern browser like Chrome, Edge, or Safari.");
-      return;
-    }
+    // If book has an audioLink, use HTML5 Audio
+    if (book.audioLink && book.audioLink.trim()) {
+      try {
+        const audio = new Audio(book.audioLink);
+        audioRef.current = audio;
 
-    // Get the book summary text
-    const summaryText = book.summary || book.bookDescription || book.subTitle || 
-      `Welcome to ${book.title} by ${book.author}. ${book.subTitle || 'This is a summary of the key ideas and insights from this book.'}`;
+        audio.onended = () => {
+          stopSample();
+        };
 
-    // Create a 30-second sample text (approximately 60-75 words)
-    const words = summaryText.split(' ');
-    const sampleWords = words.slice(0, 75).join(' ');
-    const sampleText = sampleWords.length < summaryText.length 
-      ? `${sampleWords}...` 
-      : sampleWords;
+        audio.onerror = (error) => {
+          console.error("Audio playback error:", error);
+          stopSample();
+          // Fallback to text-to-speech if audio fails
+          playTextToSpeech(book);
+        };
 
-    // Create speech synthesis utterance
-    const utterance = new SpeechSynthesisUtterance(sampleText);
-    utterance.rate = 0.9; // Slightly slower for clarity
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    
-    // Use a pleasant voice if available
-    const voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0) {
-      const preferredVoice = voices.find(voice => 
-        (voice.name.includes('Google') || voice.name.includes('Microsoft')) &&
-        voice.lang.startsWith('en')
-      ) || voices.find(voice => 
-        voice.lang.startsWith('en') && voice.localService === false
-      ) || voices.find(voice => voice.lang.startsWith('en'));
-      
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
+        audio.oncanplay = () => {
+          audio.play().catch((error) => {
+            console.error("Error playing audio:", error);
+            stopSample();
+            playTextToSpeech(book);
+          });
+        };
+
+        setPlayingId(bookId);
+      } catch (error) {
+        console.error("Error creating audio element:", error);
+        playTextToSpeech(book);
       }
+    } else {
+      // Fallback to text-to-speech if no audioLink
+      playTextToSpeech(book);
     }
 
-    speechSynthesisRef.current = utterance;
+    function playTextToSpeech(book: Book) {
+      // Check if browser supports speech synthesis
+      if (!('speechSynthesis' in window)) {
+        console.error("Speech synthesis not supported");
+        alert("No audio available for this book. Please use a modern browser.");
+        return;
+      }
 
-    // Handle when speech ends
-    utterance.onend = () => {
-      stopSample();
-    };
+      // Get the book summary text
+      const summaryText = book.summary || book.bookDescription || book.subTitle || 
+        `Welcome to ${book.title} by ${book.author}. ${book.subTitle || 'This is a summary of the key ideas and insights from this book.'}`;
 
-    utterance.onerror = (error) => {
-      console.error("Speech synthesis error:", error);
-      stopSample();
-    };
+      // Create a 30-second sample text (approximately 60-75 words)
+      const words = summaryText.split(' ');
+      const sampleWords = words.slice(0, 75).join(' ');
+      const sampleText = sampleWords.length < summaryText.length 
+        ? `${sampleWords}...` 
+        : sampleWords;
 
-    // Play the speech
-    try {
-      window.speechSynthesis.speak(utterance);
-      setPlayingId(bookId);
+      // Create speech synthesis utterance
+      const utterance = new SpeechSynthesisUtterance(sampleText);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      
+      // Use a pleasant voice if available
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const preferredVoice = voices.find(voice => 
+          (voice.name.includes('Google') || voice.name.includes('Microsoft')) &&
+          voice.lang.startsWith('en')
+        ) || voices.find(voice => 
+          voice.lang.startsWith('en') && voice.localService === false
+        ) || voices.find(voice => voice.lang.startsWith('en'));
+        
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+      }
 
-      // Stop after 30 seconds (sample duration)
-      timeoutRef.current = setTimeout(() => {
+      utterance.onend = () => {
         stopSample();
-      }, 30000);
-    } catch (error) {
-      console.error("Error starting speech:", error);
-      alert("Unable to play audio. Please check your browser settings.");
-      stopSample();
+      };
+
+      utterance.onerror = (error) => {
+        console.error("Speech synthesis error:", error);
+        stopSample();
+      };
+
+      try {
+        window.speechSynthesis.speak(utterance);
+        setPlayingId(bookId);
+      } catch (error) {
+        console.error("Error starting speech:", error);
+        stopSample();
+      }
     }
   }, [stopSample]);
 
@@ -154,6 +181,11 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     return () => {
       stopSample();
+      // Clean up audio element
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
   }, [stopSample]);
 
@@ -197,6 +229,8 @@ function BookTile({ book, duration, isBookmarked, onBookmarkToggle }: { book: Bo
   const handlePlayClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Play or stop audio sample
     if (isPlaying) {
       stopSample();
     } else {
@@ -293,6 +327,8 @@ function SuggestedBookTile({ book, duration, isBookmarked, onBookmarkToggle }: {
   const handlePlayClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Play or stop audio sample
     if (isPlaying) {
       stopSample();
     } else {

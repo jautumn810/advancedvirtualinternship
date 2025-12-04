@@ -119,6 +119,15 @@ export default function AuthModal() {
     e.stopPropagation();
     console.log("Guest login clicked");
     
+    // Close modal immediately so user can enjoy the website
+    close();
+    
+    // Redirect to /for-you if on home or choose-plan page
+    if (pathname === "/" || pathname === "/choose-plan") {
+      router.push("/for-you");
+    }
+    
+    // Handle authentication in the background
     const authInstance = getAuth();
     if (!authInstance) {
       console.error("No auth instance");
@@ -133,14 +142,10 @@ export default function AuthModal() {
       // Use Firebase anonymous authentication - no credentials needed
       await signInAnonymously(authInstance);
       console.log("Guest login successful");
-      close();
-      // Redirect to /for-you if on home or choose-plan page, otherwise stay on current page
-      if (pathname === "/" || pathname === "/choose-plan") {
-        router.push("/for-you");
-      }
     } catch (e: any) {
       console.error("Guest login error:", e);
-      dispatch(setError(e?.message || "Guest login failed"));
+      // Don't show error to user since modal is already closed
+      // Authentication will be handled by auth state listener
     } finally {
       dispatch(setLoading(false));
     }
