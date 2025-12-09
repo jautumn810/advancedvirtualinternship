@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { setAuthModalOpen, setError, setLoading, setUser } from "@/store/slices/authSlice";
+import { setAuthModalOpen, setError, setLoading, setUser, logout } from "@/store/slices/authSlice";
 import { getAuthInstance, getGoogleProvider } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
@@ -218,8 +218,19 @@ export default function AuthModal() {
     e.stopPropagation();
     console.log("Logout clicked");
     
+    // Clear guest session from localStorage first
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('guestSession');
+    }
+    
+    // Immediately clear user state in Redux
+    dispatch(logout());
+    
     const authInstance = getAuth();
-    if (!authInstance) return;
+    if (!authInstance) {
+      close();
+      return;
+    }
 
     dispatch(setLoading(true));
     try {
@@ -227,6 +238,8 @@ export default function AuthModal() {
       close();
     } catch (e: any) {
       console.error("Logout error:", e);
+      // State is already cleared, so just close the modal
+      close();
     } finally {
       dispatch(setLoading(false));
     }
