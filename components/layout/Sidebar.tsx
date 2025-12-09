@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { setAuthModalOpen, logout } from "@/store/slices/authSlice";
+import { setAuthModalOpen } from "@/store/slices/authSlice";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import {
@@ -36,19 +36,11 @@ export default function Sidebar() {
 
   const handleAuth = async () => {
     if (user) {
-      // Clear guest session from localStorage first
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('guestSession');
-      }
-      
-      // Immediately clear user state in Redux
-      dispatch(logout());
-      
       try {
         await signOut(auth);
       } catch (error) {
         console.error("Logout failed:", error);
-        // State is already cleared, so continue
+        // Error is handled by Firebase auth state listener
       }
     } else {
       dispatch(setAuthModalOpen(true));
@@ -114,3 +106,4 @@ export default function Sidebar() {
     </aside>
   );
 }
+
