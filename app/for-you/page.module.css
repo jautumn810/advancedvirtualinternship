@@ -453,49 +453,335 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .content {
-    padding: 56px 24px 80px;
-    gap: 48px;
+    margin-left: 0;
+    padding: 48px 20px 80px;
+    gap: 40px;
+  }
+
+  .toolbar {
+    justify-content: center;
+    margin-bottom: 8px;
   }
 
   .section {
-    padding: 28px;
-    border-radius: 28px;
+    padding: 24px 20px;
+    border-radius: 12px;
   }
 
-  .bookRow,
+  .section:first-of-type {
+    max-width: 100% !important;
+  }
+
+  .selectedCard {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .selectedRight {
+    flex-direction: column !important;
+    align-items: center;
+    gap: 12px !important;
+  }
+
+  .selectedMeta {
+    align-items: center;
+    text-align: center;
+  }
+
+  .selectedSummary {
+    text-align: center;
+    max-width: 100% !important;
+    font-size: 13px;
+  }
+
+  .selectedCover {
+    width: 100px;
+    margin: 0 auto;
+  }
+
+  .selectedControls {
+    justify-content: center;
+  }
+
+  .bookRow {
+    padding: 20px 4px 4px;
+    gap: 16px;
+  }
+
+  .bookTile {
+    min-width: 160px;
+    max-width: 160px;
+    padding: 16px 16px 50px;
+  }
+
+  .tileTitle {
+    font-size: 16px;
+  }
+
+  .tileAuthor {
+    font-size: 14px;
+  }
+
+  .tileDescription {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 40px 16px 72px;
+    gap: 32px;
+  }
+
+  .toolbar {
+    justify-content: center;
+    margin-bottom: 0;
+  }
+
+  .section {
+    padding: 20px 16px;
+    border-radius: 12px;
+    gap: 16px;
+  }
+
+  .sectionHeading {
+    font-size: 18px;
+  }
+
+  .sectionDescription {
+    font-size: 14px;
+  }
+
+  .bookRow {
+    padding: 16px 4px 4px;
+    gap: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .bookTile {
+    min-width: 140px;
+    max-width: 140px;
+    padding: 12px 12px 40px;
+    border-radius: 16px;
+  }
+
+  .cover {
+    border-radius: 12px;
+  }
+
+  .coverPlayButton {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    bottom: 8px;
+    right: 8px;
+  }
+
+  .bookmarkButton {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    top: 12px;
+    right: 12px;
+  }
+
+  .tileTitle {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .tileAuthor {
+    font-size: 13px;
+  }
+
+  .tileDescription {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .tileMeta {
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .metaItem {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
   .skeletonRow {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
   }
 }
 
 @media (max-width: 540px) {
   .content {
-    padding: 48px 20px 72px;
+    padding: 32px 12px 64px;
+    gap: 28px;
+  }
+
+  .toolbar {
+    justify-content: stretch;
+    margin-bottom: 0;
   }
 
   .section {
-    padding: 24px;
-    gap: 24px;
+    padding: 16px 12px;
+    gap: 16px;
+    border-radius: 12px;
   }
 
   .section:first-of-type {
-    max-width: 550px !important;
+    max-width: 100% !important;
+  }
+
+  .sectionHeading {
+    font-size: 17px;
+  }
+
+  .sectionDescription {
+    font-size: 13px;
+    margin-top: 6px;
   }
 
   .selectedCard {
-    padding: 28px;
-    gap: 4px !important;
+    padding: 16px 12px;
+    gap: 12px !important;
+    border-radius: 12px;
+  }
+
+  .selectedSummary {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .selectedTitle {
+    font-size: 15px;
+  }
+
+  .selectedAuthor {
+    font-size: 12px;
   }
 
   .selectedCover {
-    width: 120px;
+    width: 80px;
   }
 
-  .bookRow,
+  .selectedControls {
+    gap: 8px;
+  }
+
+  .playButton {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .duration {
+    font-size: 11px;
+  }
+
+  .bookRow {
+    padding: 12px 4px 4px;
+    gap: 10px;
+  }
+
+  .bookTile {
+    min-width: 120px;
+    max-width: 120px;
+    padding: 10px 10px 35px;
+    border-radius: 12px;
+  }
+
+  .cover {
+    border-radius: 10px;
+  }
+
+  .coverPlayButton {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    bottom: 6px;
+    right: 6px;
+  }
+
+  .bookmarkButton {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .tileTitle {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .tileAuthor {
+    font-size: 12px;
+  }
+
+  .tileDescription {
+    font-size: 11px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .tileMeta {
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .metaItem {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  .metaItem svg {
+    font-size: 14px;
+  }
+
   .skeletonRow {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .searchTitle {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 375px) {
+  .content {
+    padding: 24px 8px 56px;
+    gap: 24px;
+  }
+
+  .section {
+    padding: 14px 10px;
+  }
+
+  .bookTile {
+    min-width: 110px;
+    max-width: 110px;
+    padding: 8px 8px 30px;
+  }
+
+  .tileTitle {
+    font-size: 13px;
+  }
+
+  .tileAuthor {
+    font-size: 11px;
   }
 }
 

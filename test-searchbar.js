@@ -371,3 +371,6 @@ if (typeof window !== 'undefined') {
   console.log("🔍 SearchBar test function loaded! Run testSearchBar() in the console to test.");
 }
 
+
+
+

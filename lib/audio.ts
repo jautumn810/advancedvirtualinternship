@@ -5,19 +5,91 @@
  */
 export async function getAudioDuration(audioUrl: string): Promise<number> {
   return new Promise((resolve, reject) => {
+    if (!audioUrl || audioUrl.trim() === '') {
+      reject(new Error('Invalid audio URL'));
+      return;
+    }
+
     const audio = new Audio(audioUrl);
+    let timeoutId: NodeJS.Timeout | null = null;
+    let isResolved = false;
     
-    audio.addEventListener('loadedmetadata', () => {
-      resolve(audio.duration);
-    });
+    const cleanup = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      // Remove event listeners and clean up
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+      // Stop loading and remove source
+      audio.pause();
+      audio.src = '';
+      audio.load();
+    };
     
-    audio.addEventListener('error', (error) => {
-      reject(new Error('Failed to load audio: ' + error));
-    });
+    const handleLoadedMetadata = () => {
+      if (isResolved) return;
+      isResolved = true;
+      const duration = audio.duration;
+      cleanup();
+      if (isNaN(duration) || !isFinite(duration) || duration <= 0) {
+        reject(new Error('Invalid audio duration'));
+      } else {
+        resolve(duration);
+      }
+    };
+    
+    const handleCanPlayThrough = () => {
+      if (isResolved) return;
+      // If metadata wasn't loaded but we can play, try to get duration
+      if (audio.duration && isFinite(audio.duration) && audio.duration > 0) {
+        handleLoadedMetadata();
+      }
+    };
+    
+    const handleError = (error: Event) => {
+      if (isResolved) return;
+      isResolved = true;
+      cleanup();
+      const audioError = error.target as HTMLAudioElement;
+      let errorMessage = 'Failed to load audio';
+      
+      if (audioError.error) {
+        switch (audioError.error.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            errorMessage = 'Audio loading was aborted';
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage = 'Network error while loading audio';
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage = 'Audio decoding error';
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = 'Audio format not supported';
+            break;
+        }
+      }
+      
+      reject(new Error(errorMessage));
+    };
+    
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('canplaythrough', handleCanPlayThrough);
+    audio.addEventListener('error', handleError);
+    
+    // Set preload to metadata to start loading
+    audio.preload = 'metadata';
     
     // Timeout after 10 seconds
-    setTimeout(() => {
-      reject(new Error('Audio loading timeout'));
+    timeoutId = setTimeout(() => {
+      if (!isResolved) {
+        isResolved = true;
+        cleanup();
+        reject(new Error('Audio loading timeout'));
+      }
     }, 10000);
   });
 }

@@ -105,6 +105,18 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
           console.error("Audio source:", book.audioLink);
           console.error("Audio readyState:", audio.readyState);
           stopSample();
+          
+          // Check if it's a network or loading error
+          const audioError = error.target as HTMLAudioElement;
+          if (audioError.error) {
+            // Only show error for critical issues, otherwise fallback silently
+            if (audioError.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+              console.warn("Audio format not supported, falling back to text-to-speech");
+            } else if (audioError.error.code === MediaError.MEDIA_ERR_NETWORK) {
+              console.warn("Network error loading audio, falling back to text-to-speech");
+            }
+          }
+          
           // Fallback to text-to-speech if audio fails
           playTextToSpeech(book);
         };
@@ -128,7 +140,7 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
                     setPlayingId(bookId);
                   })
                   .catch((err) => {
-                    console.error("Error playing audio after canplay:", err);
+                    console.warn("Error playing audio after canplay, falling back to text-to-speech:", err);
                     stopSample();
                     playTextToSpeech(book);
                   });
@@ -140,7 +152,7 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
           // Fallback if play() doesn't return a promise
           audio.oncanplay = () => {
             audio.play().catch((error) => {
-              console.error("Error playing audio:", error);
+              console.warn("Error playing audio, falling back to text-to-speech:", error);
               stopSample();
               playTextToSpeech(book);
             });
@@ -149,7 +161,7 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
           setPlayingId(bookId);
         }
       } catch (error) {
-        console.error("Error creating audio element:", error);
+        console.warn("Error creating audio element, falling back to text-to-speech:", error);
         playTextToSpeech(book);
       }
     } else {
@@ -161,8 +173,8 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
     function playTextToSpeech(book: Book) {
       // Check if browser supports speech synthesis
       if (!('speechSynthesis' in window)) {
-        console.error("Speech synthesis not supported");
-        alert("No audio available for this book. Please use a modern browser.");
+        console.warn("Speech synthesis not supported");
+        // Don't show alert - just silently fail or log
         return;
       }
 

@@ -13,23 +13,37 @@ export function useAudioDurations(books: Book[]): DurationMap {
     const calculateDurations = async () => {
       const durationPromises = books.map(async (book) => {
         try {
-          if (book.audioLink) {
+          if (book.audioLink && book.audioLink.trim()) {
             const duration = await getAudioDuration(book.audioLink);
-            return { id: book.id, duration };
+            // Only return duration if it's valid
+            if (duration && duration > 0 && isFinite(duration)) {
+              return { id: book.id, duration };
+            }
           }
           return { id: book.id, duration: 0 };
         } catch (error) {
-          console.error(`Error calculating duration for book ${book.id}:`, error);
+          // Silently handle errors - don't log in production to avoid console spam
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`Could not calculate duration for book ${book.id}:`, error);
+          }
           return { id: book.id, duration: 0 };
         }
       });
 
-      const results = await Promise.all(durationPromises);
-      const durationMap: DurationMap = {};
-      results.forEach(({ id, duration }) => {
-        durationMap[id] = duration;
-      });
-      setDurations(durationMap);
+      try {
+        const results = await Promise.all(durationPromises);
+        const durationMap: DurationMap = {};
+        results.forEach(({ id, duration }) => {
+          durationMap[id] = duration;
+        });
+        setDurations(durationMap);
+      } catch (error) {
+        // If all promises fail, just set empty durations
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Error calculating audio durations:', error);
+        }
+        setDurations({});
+      }
     };
 
     if (books.length > 0) {
