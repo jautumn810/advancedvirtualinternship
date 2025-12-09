@@ -18,6 +18,7 @@ import { useAudioDurations } from "@/hooks/useAudioDuration";
 import { RootState } from "@/store";
 import { setAuthModalOpen } from "@/store/slices/authSlice";
 import { Book } from "@/types";
+import { AudioSampleProvider } from "@/hooks/useLibraryAudio";
 import styles from "./page.module.css";
 import typographyStyles from "@/styles/components/typography.module.css";
 import buttonStyles from "@/styles/components/button.module.css";
@@ -222,9 +223,10 @@ export default function LibraryPage() {
   }
 
   return (
-    <div className={styles.page}>
-      <Sidebar />
-      <main className={styles.content}>
+    <AudioSampleProvider>
+      <div className={styles.page}>
+        <Sidebar />
+        <main className={styles.content}>
         <header className={styles.header}>
           <div className={styles.titleRow}>
             <h1 className={typographyStyles.h2}>My Library</h1>
@@ -322,6 +324,7 @@ export default function LibraryPage() {
         </section>
       </main>
     </div>
+    </AudioSampleProvider>
   );
 }
 
