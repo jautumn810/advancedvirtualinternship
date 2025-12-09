@@ -165,6 +165,8 @@
   transition: transform var(--transition-base), box-shadow var(--transition-base);
   flex-shrink: 0;
   padding-left: 2px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .playButton:hover {
@@ -187,6 +189,8 @@
   padding: 30px 8px 8px;
   scrollbar-width: thin;
   scrollbar-color: rgba(3, 43, 65, 0.2) transparent;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
 }
 
 .bookRow::-webkit-scrollbar {
@@ -204,6 +208,12 @@
 
 .bookRow::-webkit-scrollbar-thumb:hover {
   background: rgba(3, 43, 65, 0.3);
+}
+
+@media (max-width: 768px) {
+  .bookRow {
+    scroll-snap-type: x mandatory;
+  }
 }
 
 .skeletonRow {
@@ -232,6 +242,13 @@
     transform var(--transition-base),
     box-shadow var(--transition-base);
   z-index: 1;
+  touch-action: pan-y;
+}
+
+@media (max-width: 768px) {
+  .bookTile {
+    scroll-snap-align: start;
+  }
 }
 
 .semiCircle {
@@ -293,6 +310,8 @@
   transition: transform var(--transition-base), background var(--transition-base), box-shadow var(--transition-base);
   z-index: 10;
   padding: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bookmarkButton:hover {
@@ -346,6 +365,8 @@
   transition: transform var(--transition-base), background var(--transition-base), box-shadow var(--transition-base);
   z-index: 10;
   padding-left: 2px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .coverPlayButton:hover {
@@ -533,13 +554,14 @@
 
 @media (max-width: 768px) {
   .content {
-    padding: 40px 16px 72px;
-    gap: 32px;
+    padding: 32px 16px 72px;
+    gap: 28px;
   }
 
   .toolbar {
     justify-content: center;
     margin-bottom: 0;
+    padding: 0 4px;
   }
 
   .section {
@@ -557,16 +579,18 @@
   }
 
   .bookRow {
-    padding: 16px 4px 4px;
-    gap: 12px;
+    padding: 16px 8px 4px;
+    gap: 14px;
     -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
   }
 
   .bookTile {
-    min-width: 140px;
-    max-width: 140px;
+    min-width: 145px;
+    max-width: 145px;
     padding: 12px 12px 40px;
     border-radius: 16px;
+    scroll-snap-align: start;
   }
 
   .cover {
@@ -574,19 +598,23 @@
   }
 
   .coverPlayButton {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     font-size: 16px;
     bottom: 8px;
     right: 8px;
+    min-width: 38px;
+    min-height: 38px;
   }
 
   .bookmarkButton {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     font-size: 18px;
     top: 12px;
     right: 12px;
+    min-width: 34px;
+    min-height: 34px;
   }
 
   .tileTitle {
@@ -611,23 +639,25 @@
   .metaItem {
     padding: 4px 10px;
     font-size: 11px;
+    min-height: 24px;
   }
 
   .skeletonRow {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+    gap: 14px;
   }
 }
 
 @media (max-width: 540px) {
   .content {
-    padding: 32px 12px 64px;
-    gap: 28px;
+    padding: 24px 12px 64px;
+    gap: 24px;
   }
 
   .toolbar {
     justify-content: stretch;
     margin-bottom: 0;
+    padding: 0 4px;
   }
 
   .section {
@@ -651,17 +681,19 @@
 
   .selectedCard {
     padding: 16px 12px;
-    gap: 12px !important;
+    gap: 14px !important;
     border-radius: 12px;
   }
 
   .selectedSummary {
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 1.5;
+    padding: 0 4px;
   }
 
   .selectedTitle {
     font-size: 15px;
+    line-height: 1.3;
   }
 
   .selectedAuthor {
@@ -669,17 +701,21 @@
   }
 
   .selectedCover {
-    width: 80px;
+    width: 85px;
   }
 
   .selectedControls {
-    gap: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .playButton {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+    min-width: 40px;
+    min-height: 40px;
   }
 
   .duration {
@@ -687,15 +723,18 @@
   }
 
   .bookRow {
-    padding: 12px 4px 4px;
-    gap: 10px;
+    padding: 12px 8px 4px;
+    gap: 12px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
   }
 
   .bookTile {
-    min-width: 120px;
-    max-width: 120px;
-    padding: 10px 10px 35px;
-    border-radius: 12px;
+    min-width: 130px;
+    max-width: 130px;
+    padding: 12px 12px 40px;
+    border-radius: 14px;
+    scroll-snap-align: start;
   }
 
   .cover {
@@ -703,47 +742,57 @@
   }
 
   .coverPlayButton {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-    bottom: 6px;
-    right: 6px;
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+    bottom: 8px;
+    right: 8px;
+    min-width: 36px;
+    min-height: 36px;
   }
 
   .bookmarkButton {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     font-size: 16px;
     top: 10px;
     right: 10px;
+    min-width: 32px;
+    min-height: 32px;
   }
 
   .tileTitle {
     font-size: 14px;
-    line-height: 1.2;
+    line-height: 1.3;
+    margin-top: 4px;
   }
 
   .tileAuthor {
     font-size: 12px;
+    margin-top: 2px;
   }
 
   .tileDescription {
     font-size: 11px;
-    line-height: 1.3;
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    margin-top: 4px;
   }
 
   .tileMeta {
     gap: 6px;
     font-size: 11px;
+    margin-top: 8px;
   }
 
   .metaItem {
-    padding: 3px 8px;
+    padding: 4px 10px;
     font-size: 10px;
+    min-height: 24px;
   }
 
   .metaItem svg {
@@ -751,8 +800,8 @@
   }
 
   .skeletonRow {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
   }
 
   .searchTitle {
@@ -760,20 +809,73 @@
   }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 480px) {
   .content {
-    padding: 24px 8px 56px;
-    gap: 24px;
+    padding: 20px 10px 56px;
+    gap: 20px;
   }
 
   .section {
     padding: 14px 10px;
+    gap: 14px;
+  }
+
+  .sectionHeading {
+    font-size: 16px;
+  }
+
+  .sectionDescription {
+    font-size: 12px;
+  }
+
+  .selectedCard {
+    padding: 14px 10px;
+    gap: 12px !important;
+  }
+
+  .selectedSummary {
+    font-size: 11px;
+  }
+
+  .selectedTitle {
+    font-size: 14px;
+  }
+
+  .selectedAuthor {
+    font-size: 11px;
+  }
+
+  .selectedCover {
+    width: 75px;
+  }
+
+  .playButton {
+    width: 38px;
+    height: 38px;
+    font-size: 13px;
+  }
+
+  .bookRow {
+    padding: 10px 6px 4px;
+    gap: 10px;
   }
 
   .bookTile {
-    min-width: 110px;
-    max-width: 110px;
-    padding: 8px 8px 30px;
+    min-width: 125px;
+    max-width: 125px;
+    padding: 10px 10px 38px;
+  }
+
+  .coverPlayButton {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .bookmarkButton {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
   }
 
   .tileTitle {
@@ -782,6 +884,136 @@
 
   .tileAuthor {
     font-size: 11px;
+  }
+
+  .tileDescription {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 375px) {
+  .content {
+    padding: 16px 8px 48px;
+    gap: 18px;
+  }
+
+  .section {
+    padding: 12px 8px;
+    gap: 12px;
+  }
+
+  .sectionHeading {
+    font-size: 15px;
+  }
+
+  .sectionDescription {
+    font-size: 11px;
+  }
+
+  .selectedCard {
+    padding: 12px 8px;
+    gap: 10px !important;
+  }
+
+  .selectedSummary {
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .selectedTitle {
+    font-size: 13px;
+  }
+
+  .selectedAuthor {
+    font-size: 10px;
+  }
+
+  .selectedCover {
+    width: 70px;
+  }
+
+  .playButton {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .duration {
+    font-size: 10px;
+  }
+
+  .bookRow {
+    padding: 8px 4px 4px;
+    gap: 8px;
+  }
+
+  .bookTile {
+    min-width: 115px;
+    max-width: 115px;
+    padding: 8px 8px 32px;
+    border-radius: 12px;
+  }
+
+  .cover {
+    border-radius: 8px;
+  }
+
+  .coverPlayButton {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+    bottom: 6px;
+    right: 6px;
+  }
+
+  .bookmarkButton {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    top: 8px;
+    right: 8px;
+  }
+
+  .tileTitle {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .tileAuthor {
+    font-size: 10px;
+  }
+
+  .tileDescription {
+    font-size: 9px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .tileMeta {
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .metaItem {
+    padding: 3px 8px;
+    font-size: 9px;
+  }
+
+  .metaItem svg {
+    font-size: 12px;
+  }
+
+  .skeletonRow {
+    grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+    gap: 8px;
+  }
+
+  .searchTitle {
+    font-size: 16px;
   }
 }
 
