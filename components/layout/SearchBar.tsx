@@ -111,38 +111,33 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
         dispatch(setSearchResults(books));
         dispatch(setError(null));
         
-        // Navigate to for-you page to show results if not already there
-        // Only navigate if user has completely stopped typing for a significant time
-        // This prevents the search bar from disappearing while typing
+        // Don't navigate while user is typing - only navigate after they've stopped typing
+        // Check if current query matches debounced query (user has stopped typing)
+        const currentQuery = searchQuery.trim();
+        const debouncedQuery = debouncedSearchQuery.trim();
+        
+        // Only navigate if:
+        // 1. We're not already on for-you page
+        // 2. We have search results
+        // 3. User has stopped typing (queries match)
+        // 4. We're not already navigating
         if (
           pathname !== "/for-you" && 
           !localFilterMode && 
           books.length > 0 && 
-          !isNavigatingRef.current
+          !isNavigatingRef.current &&
+          currentQuery === debouncedQuery &&
+          currentQuery.length > 0
         ) {
-          // Wait longer and check if user is still typing before navigating
-          // This ensures the search bar doesn't disappear while user is typing
+          // Use a longer delay to ensure user has completely stopped typing
+          // This prevents the search bar from disappearing while typing
           navigationTimeout = setTimeout(() => {
-            // Check if user has stopped typing (enough time has passed since last keystroke)
-            const timeSinceLastTyping = Date.now() - lastTypingTimeRef.current;
-            const isInputFocused = inputRef.current && document.activeElement === inputRef.current;
-            const queryUnchanged = searchQuery.trim() === debouncedSearchQuery.trim();
-            
-            // Only navigate if:
-            // 1. User hasn't typed in the last 2 seconds
-            // 2. Input is not focused (user stopped typing)
-            // 3. Query hasn't changed
-            // 4. Not already navigating
-            if (
-              timeSinceLastTyping >= 2000 &&
-              !isInputFocused &&
-              queryUnchanged &&
-              !isNavigatingRef.current
-            ) {
+            // Double-check query hasn't changed during timeout
+            if (searchQuery.trim() === debouncedQuery && !isNavigatingRef.current) {
               isNavigatingRef.current = true;
-              router.push("/for-you");
+              router.replace("/for-you");
             }
-          }, 2500); // Wait 2.5 seconds after debounce to ensure user completely stopped typing
+          }, 500); // Wait 500ms after debounce completes
         }
       } catch (error: any) {
         console.error("Search error:", error);
