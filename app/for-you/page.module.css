@@ -34,6 +34,7 @@
   width: 100%;
 }
 
+
 .section > div:first-of-type h2 {
   margin: 0;
 }
@@ -495,37 +496,61 @@
     max-width: 100% !important;
   }
 
+  .section:first-of-type .sectionHeading {
+    display: none;
+  }
+
   .selectedCard {
+    display: grid !important;
     grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto !important;
     gap: 16px !important;
-    padding: 20px;
-    text-align: center;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
-  .selectedRight {
-    flex-direction: column !important;
-    align-items: center;
-    gap: 12px !important;
+  .selectedCard .selectedSummary {
+    display: none;
   }
 
-  .selectedMeta {
-    align-items: center;
-    text-align: center;
+  .selectedCard .selectedMeta {
+    display: contents;
   }
 
-  .selectedSummary {
-    text-align: center;
-    max-width: 100% !important;
-    font-size: 13px;
+  .selectedCard .selectedTitle {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0;
+    grid-row: 1;
+    grid-column: 1;
   }
 
-  .selectedCover {
+  .selectedCard .selectedAuthor {
+    display: none;
+  }
+
+  .selectedCard .selectedCover {
     width: 100px;
-    margin: 0 auto;
+    flex-shrink: 0;
+    margin: 0;
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: start;
   }
 
-  .selectedControls {
-    justify-content: center;
+  .selectedCard .selectedControls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: end;
+    align-self: center;
   }
 
   .bookRow {
@@ -554,33 +579,41 @@
 
 @media (max-width: 768px) {
   .content {
-    padding: 32px 16px 72px;
-    gap: 28px;
+    padding: 20px 16px 72px;
+    gap: 32px;
   }
 
   .toolbar {
-    justify-content: center;
-    margin-bottom: 0;
-    padding: 0 4px;
+    display: none;
   }
 
   .section {
-    padding: 20px 16px;
-    border-radius: 12px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
     gap: 16px;
   }
 
+  .section:first-of-type {
+    padding: 0;
+  }
+
   .sectionHeading {
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
   }
 
   .sectionDescription {
-    font-size: 14px;
+    font-size: 15px;
+    color: #4a5d6d;
+    margin: 0;
   }
 
   .bookRow {
-    padding: 16px 8px 4px;
-    gap: 14px;
+    padding: 0;
+    gap: 16px;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
   }
@@ -650,64 +683,93 @@
 
 @media (max-width: 540px) {
   .content {
-    padding: 24px 12px 64px;
-    gap: 24px;
+    padding: 16px 12px 64px;
+    gap: 28px;
   }
 
   .toolbar {
-    justify-content: stretch;
-    margin-bottom: 0;
-    padding: 0 4px;
+    display: none;
   }
 
   .section {
-    padding: 16px 12px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
     gap: 16px;
-    border-radius: 12px;
   }
 
   .section:first-of-type {
-    max-width: 100% !important;
+    padding: 0;
   }
 
   .sectionHeading {
-    font-size: 17px;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
   }
 
   .sectionDescription {
-    font-size: 13px;
-    margin-top: 6px;
+    font-size: 15px;
+    color: #4a5d6d;
+    margin: 0;
+  }
+
+  .section:first-of-type .sectionHeading {
+    display: none;
   }
 
   .selectedCard {
-    padding: 16px 12px;
-    gap: 14px !important;
-    border-radius: 12px;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 16px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
-  .selectedSummary {
-    font-size: 12px;
-    line-height: 1.5;
-    padding: 0 4px;
+  .selectedCard .selectedSummary {
+    display: none;
   }
 
-  .selectedTitle {
-    font-size: 15px;
+  .selectedCard .selectedMeta {
+    display: contents;
+  }
+
+  .selectedCard .selectedTitle {
+    font-size: 18px;
+    font-weight: 700;
     line-height: 1.3;
+    margin-bottom: 0;
+    grid-row: 1;
+    grid-column: 1;
   }
 
-  .selectedAuthor {
-    font-size: 12px;
+  .selectedCard .selectedAuthor {
+    display: none;
   }
 
-  .selectedCover {
-    width: 85px;
+  .selectedCard .selectedCover {
+    width: 100px;
+    flex-shrink: 0;
+    margin: 0;
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: start;
   }
 
-  .selectedControls {
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
+  .selectedCard .selectedControls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: end;
+    align-self: center;
   }
 
   .playButton {
@@ -723,8 +785,8 @@
   }
 
   .bookRow {
-    padding: 12px 8px 4px;
-    gap: 12px;
+    padding: 0;
+    gap: 16px;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
   }
@@ -811,53 +873,90 @@
 
 @media (max-width: 480px) {
   .content {
-    padding: 20px 10px 56px;
-    gap: 20px;
+    padding: 16px 12px 56px;
+    gap: 28px;
+  }
+
+  .toolbar {
+    display: none;
   }
 
   .section {
-    padding: 14px 10px;
-    gap: 14px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    gap: 16px;
+  }
+
+  .section:first-of-type {
+    padding: 0;
   }
 
   .sectionHeading {
-    font-size: 16px;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
   }
 
   .sectionDescription {
-    font-size: 12px;
+    font-size: 15px;
+    color: #4a5d6d;
+    margin: 0;
   }
 
   .selectedCard {
-    padding: 14px 10px;
-    gap: 12px !important;
-  }
-
-  .selectedSummary {
-    font-size: 11px;
+    padding: 0;
+    gap: 16px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
 
   .selectedTitle {
-    font-size: 14px;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
   }
 
-  .selectedAuthor {
-    font-size: 11px;
+  .selectedContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
   }
 
   .selectedCover {
-    width: 75px;
+    width: 100px;
+    flex-shrink: 0;
+  }
+
+  .selectedControls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .selectedAuthor {
+    display: none;
+  }
+
+  .selectedSummary {
+    display: none;
   }
 
   .playButton {
-    width: 38px;
-    height: 38px;
-    font-size: 13px;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
   }
 
   .bookRow {
-    padding: 10px 6px 4px;
-    gap: 10px;
+    padding: 0;
+    gap: 16px;
   }
 
   .bookTile {
@@ -893,49 +992,85 @@
 
 @media (max-width: 375px) {
   .content {
-    padding: 16px 8px 48px;
-    gap: 18px;
+    padding: 16px 12px 48px;
+    gap: 28px;
+  }
+
+  .toolbar {
+    display: none;
   }
 
   .section {
-    padding: 12px 8px;
-    gap: 12px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    gap: 16px;
+  }
+
+  .section:first-of-type {
+    padding: 0;
   }
 
   .sectionHeading {
-    font-size: 15px;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
   }
 
   .sectionDescription {
-    font-size: 11px;
+    font-size: 15px;
+    color: #4a5d6d;
+    margin: 0;
   }
 
   .selectedCard {
-    padding: 12px 8px;
-    gap: 10px !important;
-  }
-
-  .selectedSummary {
-    font-size: 10px;
-    line-height: 1.4;
+    padding: 0;
+    gap: 16px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
 
   .selectedTitle {
-    font-size: 13px;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
   }
 
-  .selectedAuthor {
-    font-size: 10px;
+  .selectedContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
   }
 
   .selectedCover {
-    width: 70px;
+    width: 100px;
+    flex-shrink: 0;
+  }
+
+  .selectedControls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .selectedAuthor {
+    display: none;
+  }
+
+  .selectedSummary {
+    display: none;
   }
 
   .playButton {
-    width: 36px;
-    height: 36px;
-    font-size: 12px;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
   }
 
   .duration {
@@ -943,8 +1078,8 @@
   }
 
   .bookRow {
-    padding: 8px 4px 4px;
-    gap: 8px;
+    padding: 0;
+    gap: 16px;
   }
 
   .bookTile {

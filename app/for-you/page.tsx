@@ -100,20 +100,22 @@ function AudioSampleProvider({ children }: { children: React.ReactNode }) {
           stopSample();
         };
 
-        audio.onerror = (error) => {
+        audio.onerror = (error: string | Event) => {
           console.error("Audio playback error:", error);
           console.error("Audio source:", book.audioLink);
           console.error("Audio readyState:", audio.readyState);
           stopSample();
           
-          // Check if it's a network or loading error
-          const audioError = error.target as HTMLAudioElement;
-          if (audioError.error) {
-            // Only show error for critical issues, otherwise fallback silently
-            if (audioError.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
-              console.warn("Audio format not supported, falling back to text-to-speech");
-            } else if (audioError.error.code === MediaError.MEDIA_ERR_NETWORK) {
-              console.warn("Network error loading audio, falling back to text-to-speech");
+          // Check if it's a network or loading error (only if error is an Event)
+          if (error instanceof Event) {
+            const audioError = error.target as HTMLAudioElement | null;
+            if (audioError?.error) {
+              // Only show error for critical issues, otherwise fallback silently
+              if (audioError.error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+                console.warn("Audio format not supported, falling back to text-to-speech");
+              } else if (audioError.error.code === MediaError.MEDIA_ERR_NETWORK) {
+                console.warn("Network error loading audio, falling back to text-to-speech");
+              }
             }
           }
           
