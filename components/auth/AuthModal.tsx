@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { setAuthModalOpen, setError, setLoading } from "@/store/slices/authSlice";
+import { setAuthModalOpen, setError, setLoading, setUser } from "@/store/slices/authSlice";
 import { getAuthInstance, getGoogleProvider } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
@@ -57,9 +57,13 @@ export default function AuthModal() {
     e?.stopPropagation();
     console.log("Login clicked", { email, password });
     
+    // Close modal immediately for dummy login (accept any input)
+    close();
+    
     const authInstance = getAuth();
     if (!authInstance) {
       console.error("No auth instance");
+      // Modal already closed, just return
       return;
     }
 
@@ -70,14 +74,17 @@ export default function AuthModal() {
       console.log("Attempting login...");
       await signInWithEmailAndPassword(authInstance, email, password);
       console.log("Login successful");
-      close();
       // Redirect to /for-you if on home or choose-plan page, otherwise stay on current page
       if (pathname === "/" || pathname === "/choose-plan") {
         router.push("/for-you");
       }
     } catch (e: any) {
       console.error("Login error:", e);
-      dispatch(setError(e?.message || "Login failed"));
+      // Don't show error for dummy login - modal is already closed
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Login failed:", e?.message);
+      }
     } finally {
       dispatch(setLoading(false));
     }
@@ -122,32 +129,53 @@ export default function AuthModal() {
     // Close modal immediately so user can enjoy the website
     close();
     
-    // Redirect to /for-you if on home or choose-plan page
+    // Set a guest user immediately so Library access works
+    const guestUser = {
+      uid: `guest_${Date.now()}`,
+      email: null,
+      displayName: null,
+      isAnonymous: true,
+    };
+    dispatch(setUser(guestUser as any));
+    
+    // Store guest session in localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('guestSession', JSON.stringify({ uid: guestUser.uid, timestamp: Date.now() }));
+    }
+    
+    // Handle authentication in the background (try Firebase anonymous auth)
+    const authInstance = getAuth();
+    if (authInstance) {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      
+      try {
+        console.log("Attempting anonymous guest login...");
+        // Use Firebase anonymous authentication - no credentials needed
+        const result = await signInAnonymously(authInstance);
+        // If Firebase auth succeeds, update user with real Firebase user
+        if (result.user) {
+          dispatch(setUser({
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            isAnonymous: result.user.isAnonymous,
+          } as any));
+        }
+        console.log("Guest login successful");
+      } catch (e: any) {
+        console.error("Guest login error:", e);
+        // Don't show error to user since modal is already closed
+        // Guest user is already set, so Library access will work
+      } finally {
+        dispatch(setLoading(false));
+      }
+    }
+    
+    // Redirect to /for-you if on home or choose-plan page, otherwise stay on current page
+    // This allows Library page access even if guest login fails
     if (pathname === "/" || pathname === "/choose-plan") {
       router.push("/for-you");
-    }
-    
-    // Handle authentication in the background
-    const authInstance = getAuth();
-    if (!authInstance) {
-      console.error("No auth instance");
-      return;
-    }
-
-    dispatch(setLoading(true));
-    dispatch(setError(null));
-    
-    try {
-      console.log("Attempting anonymous guest login...");
-      // Use Firebase anonymous authentication - no credentials needed
-      await signInAnonymously(authInstance);
-      console.log("Guest login successful");
-    } catch (e: any) {
-      console.error("Guest login error:", e);
-      // Don't show error to user since modal is already closed
-      // Authentication will be handled by auth state listener
-    } finally {
-      dispatch(setLoading(false));
     }
   };
 

@@ -48,6 +48,30 @@ export function useAuthListener(): void {
             dispatch(setSubscriptionLoading(false));
           });
       } else {
+        // Check for guest session in localStorage
+        if (typeof window !== 'undefined') {
+          const guestSession = localStorage.getItem('guestSession');
+          if (guestSession) {
+            try {
+              const session = JSON.parse(guestSession);
+              // Restore guest user if session is less than 30 days old
+              const sessionAge = Date.now() - (session.timestamp || 0);
+              const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+              if (sessionAge < thirtyDays && session.uid) {
+                dispatch(setUser({
+                  uid: session.uid,
+                  email: null,
+                  displayName: null,
+                  isAnonymous: true,
+                } as any));
+                return;
+              }
+            } catch (e) {
+              // Invalid session data, clear it
+              localStorage.removeItem('guestSession');
+            }
+          }
+        }
         dispatch(setUser(null));
         dispatch(setSubscription(null));
         dispatch(setSubscriptionLoading(false));
