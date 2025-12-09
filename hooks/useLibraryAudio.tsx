@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useRef, useState, useCallback, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useRef, useState, useCallback, useEffect, ReactNode } from "react";
 
 // Audio Sample Context for Library page
 interface AudioSampleContextType {

@@ -1,0 +1,154 @@
+You are my senior full-stack engineer. Your ONLY job is to:
+
+1. Fix and enforce the bookmarking system behavior.
+2. Fix the login modal behavior (including guest login and dummy login).
+3. Ensure all audio samples and Read/Listen buttons work for each book.
+
+You must NOT change anything else.
+
+===============================================
+🔒 HARD LIMITS — DO NOT BREAK THESE
+===============================================
+- Do NOT modify UI, layout, styling, animations, spacing, colors, or general appearance.
+- Do NOT refactor or rewrite large sections of code.
+- Do NOT reorganize folders, rename files, or change the project structure.
+- Do NOT add new features I did NOT ask for.
+- Do NOT change dynamic routing (it already works).
+- Do NOT change any logic unrelated to:
+  • bookmarking,
+  • Library behavior,
+  • login modal (including guest & dummy login),
+  • audio playback for book samples,
+  • Read / Listen buttons for each book.
+
+ONLY touch the minimum number of lines necessary to satisfy the requirements below.
+
+===============================================
+📚 SECTION 1 — BOOKMARKING & LIBRARY
+===============================================
+Make sure the bookmarking system works exactly as described:
+
+1. When a user clicks the bookmark button on any book:
+   - The bookmark state must toggle correctly (bookmarked ↔ unbookmarked).
+   - When a book is bookmarked, it must automatically be saved to the user's Library using whatever persistence system already exists (localStorage, database, API, etc.).
+   - The same book must NOT be added multiple times — prevent duplicates in the Library.
+   - Bookmark state and Library contents must persist after page refresh.
+
+2. On the Library page:
+   - All saved books must display correctly from persistent storage.
+   - Bookmarks should still behave correctly when toggled on/off from here (if supported in the current design), without breaking anything.
+
+3. Do NOT change:
+   - Any existing styling or layout for book cards.
+   - Any routing logic (clicking books to open details already works — leave that intact).
+
+===============================================
+🪟 SECTION 2 — LOGIN MODAL BEHAVIOR (ALL PAGES)
+===============================================
+Fix the login modal behavior across ALL pages where it appears.
+
+1. Library page — Login as Guest:
+   - When the user clicks the **“Login as Guest”** button:
+     • The login modal must immediately close (hide/remove).
+     • The user should be treated as “logged in” for accessing the Library (no real auth needed).
+     • The modal must NOT reopen automatically unless explicitly triggered again.
+
+2. Regular login with dummy data:
+   - When the user (or my instructor) enters ANY dummy data (fake email + password) and submits:
+     • The login modal must immediately close after submission.
+     • No real auth or validation is required — treat any input as a successful login for now.
+     • The modal should stay closed unless the user purposefully opens it.
+
+3. Modal consistency on all pages:
+   - Ensure the modal’s close behavior is consistent for:
+     • clicking the close/X button (if present),
+     • clicking outside the modal (if supported),
+     • clicking “Login as Guest”,
+     • submitting the login form with any data.
+   - Fix the issue with the modal on **every page** where it appears so it never gets stuck, half-visible, or reappears unexpectedly.
+
+===============================================
+🎧 SECTION 3 — AUDIO SAMPLES & READ/LISTEN BUTTONS
+===============================================
+Make sure audio and buttons work correctly for each book, on EVERY page where the books appear.
+
+1. Audio recording samples:
+   - For each book that has an audio sample:
+     • Make sure it is wired to the correct audio source.
+     • Ensure the audio is actually playable (not muted, not broken).
+   - On every page where that book appears (home, Library, lists, detail, etc.):
+     • The user must be able to listen to the sample via the proper control.
+   - If there is already an audio player component, reuse it instead of creating a new one.
+
+2. Read & Listen buttons:
+   - For each book card or book display:
+     • The **Read** button under the book must perform its intended action (e.g., navigate to the book’s reader/detail page, or whatever is already designed).
+     • The **Listen** button(s) under the Read button must:
+       – trigger audio playback for that specific book’s sample,
+       – not trigger the wrong book’s audio.
+   - This must work consistently:
+     • on the homepage (if books are shown there),
+     • on the Library page,
+     • on search/category/all-books pages (if present),
+     • on the individual book detail page (if applicable).
+
+===============================================
+🧪 SECTION 4 — SELF-TESTING REQUIREMENTS
+===============================================
+Before you give me any final code, you MUST internally test or reason through the code and ensure that all of the following are true:
+
+1. Bookmarking:
+   - Clicking the bookmark button:
+     • toggles bookmarked/unbookmarked correctly,
+     • automatically saves the book to the Library when bookmarked,
+     • prevents duplicates in the Library,
+     • persists after refresh.
+   - The Library loads all saved books correctly.
+
+2. Login modal:
+   - On the Library page:
+     • Clicking “Login as Guest” closes the modal immediately and allows Library access.
+   - On any page with the login form:
+     • Submitting ANY email/password closes the modal.
+   - The modal opens and closes consistently via its triggers with no stuck or ghost states.
+
+3. Audio + Read/Listen:
+   - All existing audio samples are audible on each page where their book appears.
+   - All **Read** buttons work as intended for each book.
+   - All **Listen** buttons work for each book and play the correct audio.
+
+4. No regressions:
+   - Bookmarking still works correctly everywhere it is used.
+   - Dynamic routing to book pages still works exactly as before.
+   - No unrelated UI, styling, or behavior has changed.
+   - No new errors are introduced in the console.
+
+===============================================
+📤 SECTION 5 — OUTPUT REQUIREMENTS
+===============================================
+When you respond:
+
+- Only modify files that are directly related to:
+  • bookmarking & Library persistence,
+  • login modal & login/guest logic,
+  • audio samples & Read/Listen button behavior.
+- Do NOT alter unrelated files, components, or configuration.
+
+- Provide:
+  • Full updated code blocks for every file you changed (so I can copy/paste directly).
+  • A short explanation listing:
+    – which files were changed,
+    – what was changed,
+    – why each change was necessary to satisfy the requirements.
+
+- Do NOT include:
+  • Unsolicited refactors,
+  • Extra “improvements”,
+  • Changes to styling or layout,
+  • New features not requested.
+
+===============================================
+❓ QUESTIONS
+===============================================
+If you absolutely need more info (for example, to know where the current login modal or bookmark logic lives), ask me ONE very specific question at a time.
+Otherwise, proceed with the changes using the existing project structure and patterns.
