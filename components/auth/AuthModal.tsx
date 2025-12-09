@@ -216,17 +216,22 @@ export default function AuthModal() {
   const onLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Logout clicked");
     
-    const authInstance = getAuth();
-    if (!authInstance) return;
+    const authInstance = getAuthInstance();
+    if (!authInstance) {
+      console.error("Firebase Auth is not initialized");
+      dispatch(setError("Logout failed: Authentication service is not available"));
+      return;
+    }
 
     dispatch(setLoading(true));
+    dispatch(setError(null));
     try {
       await signOut(authInstance);
       close();
-    } catch (e: any) {
-      console.error("Logout error:", e);
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      dispatch(setError(error?.message || "Logout failed. Please try again."));
     } finally {
       dispatch(setLoading(false));
     }

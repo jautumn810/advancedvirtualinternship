@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setAuthModalOpen } from "@/store/slices/authSlice";
 import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { getAuthInstance } from "@/lib/firebase";
 import styles from "./Navbar.module.css";
 import containerStyles from "@/styles/components/container.module.css";
 import buttonStyles from "@/styles/components/button.module.css";
@@ -34,10 +34,16 @@ export default function Navbar() {
   const handleLogout = async () => {
     setMenuOpen(false);
     try {
-      await signOut(auth);
-    } catch (error) {
+      const authInstance = getAuthInstance();
+      if (!authInstance) {
+        console.error("Firebase Auth is not initialized");
+        return;
+      }
+      await signOut(authInstance);
+    } catch (error: any) {
       console.error("Logout failed:", error);
       // Error is handled by Firebase auth state listener
+      // If logout fails, the user state will remain the same
     }
   };
 
