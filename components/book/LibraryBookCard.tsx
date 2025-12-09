@@ -2,15 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setAuthModalOpen } from "@/store/slices/authSlice";
 import { Book } from "@/types";
 import { formatDuration } from "@/lib/audio";
-import { FiTrash2, FiClock, FiStar, FiBookOpen, FiMic, FiPause } from "react-icons/fi";
-import { useLibraryAudio } from "@/hooks/useLibraryAudio";
+import { FiTrash2, FiClock, FiStar, FiBookOpen, FiMic, FiPlay, FiPause } from "react-icons/fi";
 import styles from "./LibraryBookCard.module.css";
 
 interface LibraryBookCardProps {
@@ -32,12 +31,31 @@ export default function LibraryBookCard({
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const [imageSrc, setImageSrc] = useState(book.imageLink || FALLBACK_IMAGE);
-  const audioContext = useLibraryAudio();
-  const isPlaying = audioContext?.playingId === book.id;
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setImageSrc(book.imageLink || FALLBACK_IMAGE);
   }, [book.imageLink]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => setIsPlaying(false);
+    const handlePause = () => setIsPlaying(false);
+    const handlePlay = () => setIsPlaying(true);
+
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("play", handlePlay);
+
+    return () => {
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("play", handlePlay);
+    };
+  }, [book.audioLink]);
 
   const ratingDisplay = book.averageRating && !Number.isNaN(book.averageRating)
     ? book.averageRating.toFixed(1)
@@ -68,20 +86,36 @@ export default function LibraryBookCard({
       return;
     }
 
-    if (!audioContext) {
-      console.error("Audio context not available");
-      return;
-    }
+    const audio = audioRef.current;
+    if (!audio) return;
 
     if (isPlaying) {
-      audioContext.stopSample();
+      audio.pause();
+      setIsPlaying(false);
     } else {
-      audioContext.playSample(book.id, book.audioLink);
+      // Stop any other playing audio
+      document.querySelectorAll('audio').forEach(a => {
+        if (a !== audio && !a.paused) {
+          a.pause();
+        }
+      });
+      audio.play().catch((err) => {
+        console.error("Error playing audio:", err);
+      });
+      setIsPlaying(true);
     }
   };
 
   return (
     <div className={styles.card}>
+      {book.audioLink && (
+        <audio
+          ref={audioRef}
+          src={book.audioLink}
+          preload="metadata"
+          style={{ display: "none" }}
+        />
+      )}
       <Link href={`/book/${encodeURIComponent(book.id)}`} className={styles.cardLink}>
         <div className={styles.imageWrap}>
           <Image

@@ -27,15 +27,17 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
   const shouldHide = pathname === "/" || pathname === "/choose-plan";
   const inputRef = useRef<HTMLInputElement>(null);
   const isNavigatingRef = useRef(false);
+  const lastTypingTimeRef = useRef<number>(0);
   
   // Restore search query from URL or maintain it across navigation
   useEffect(() => {
-    // Keep search query when navigating to for-you page
-    if (pathname === "/for-you" && inputRef.current && !inputRef.current.value && searchQuery) {
-      // Query is maintained by state, so this is fine
-    }
     // Reset navigation flag when pathname changes
     isNavigatingRef.current = false;
+    
+    // Preserve search query value in input if it exists
+    if (inputRef.current && searchQuery && inputRef.current.value !== searchQuery) {
+      inputRef.current.value = searchQuery;
+    }
   }, [pathname, searchQuery]);
   
   // Get locally available books to enhance search
@@ -111,33 +113,40 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
         dispatch(setSearchResults(books));
         dispatch(setError(null));
         
-        // Don't navigate while user is typing - only navigate after they've stopped typing
-        // Check if current query matches debounced query (user has stopped typing)
-        const currentQuery = searchQuery.trim();
-        const debouncedQuery = debouncedSearchQuery.trim();
-        
-        // Only navigate if:
-        // 1. We're not already on for-you page
-        // 2. We have search results
-        // 3. User has stopped typing (queries match)
-        // 4. We're not already navigating
+        // Navigate to for-you page to show results if not already there
+        // Only navigate if user has completely stopped typing for a significant time
+        // This prevents the search bar from disappearing while typing
         if (
           pathname !== "/for-you" && 
           !localFilterMode && 
           books.length > 0 && 
-          !isNavigatingRef.current &&
-          currentQuery === debouncedQuery &&
-          currentQuery.length > 0
+          !isNavigatingRef.current
         ) {
-          // Use a longer delay to ensure user has completely stopped typing
-          // This prevents the search bar from disappearing while typing
+          // Wait longer and check if user is still typing before navigating
+          // This ensures the search bar doesn't disappear while user is typing
           navigationTimeout = setTimeout(() => {
-            // Double-check query hasn't changed during timeout
-            if (searchQuery.trim() === debouncedQuery && !isNavigatingRef.current) {
+            // Check if user has stopped typing (enough time has passed since last keystroke)
+            const timeSinceLastTyping = Date.now() - lastTypingTimeRef.current;
+            const isInputFocused = inputRef.current && document.activeElement === inputRef.current;
+            const queryUnchanged = searchQuery.trim() === debouncedSearchQuery.trim();
+            
+            // Only navigate if:
+            // 1. User hasn't typed in the last 2 seconds
+            // 2. Input is not focused (user stopped typing)
+            // 3. Query hasn't changed
+            // 4. Not already navigating
+            if (
+              timeSinceLastTyping >= 2000 &&
+              !isInputFocused &&
+              queryUnchanged &&
+              !isNavigatingRef.current &&
+              inputRef.current &&
+              document.activeElement !== inputRef.current
+            ) {
               isNavigatingRef.current = true;
-              router.replace("/for-you");
+              router.push("/for-you");
             }
-          }, 500); // Wait 500ms after debounce completes
+          }, 2500); // Wait 2.5 seconds after debounce to ensure user completely stopped typing
         }
       } catch (error: any) {
         console.error("Search error:", error);
@@ -174,6 +183,8 @@ export default function SearchBar({ localBooks: propLocalBooks, onLocalFilter, l
         value={searchQuery}
         onChange={(e) => {
           setSearchQuery(e.target.value);
+          // Track when user last typed to prevent navigation while typing
+          lastTypingTimeRef.current = Date.now();
         }}
         onFocus={(e) => {
           // Ensure search bar stays visible on focus
